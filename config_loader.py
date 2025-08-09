@@ -1,0 +1,36 @@
+from pathlib import Path
+from box import Box
+import yaml
+import importlib
+import pkgutil
+from analysis_registry import ANALYSIS_REGISTRY
+from plot_registry import PLOT_REGISTRY
+
+class ConfigLoader:
+    def __init__(self, config_file: str = "config.yaml"):
+        self.config_file = Path(config_file)
+        self._config: Box = self._load()
+        self._validate()
+        self._autoimport('analyses')
+        self._autoimport('plots')
+
+    def _load(self) -> Box:
+        with open(self.config_file, "r") as f:
+            return Box(yaml.safe_load(f))
+
+    def _validate(self):
+        for key in ["group_col","value_col","lower_limit_col","upper_limit_col","analyses","plots","output"]:
+            if key not in self._config:
+                raise KeyError(f"Missing key: {key}")
+
+    def _autoimport(self, pkg):
+        package = importlib.import_module(pkg)
+        path = Path(package.__file__).parent
+        for _, modname, ispkg in pkgutil.iter_modules([str(path)]):
+            if not ispkg:
+                importlib.import_module(f"{pkg}.{modname}")
+
+    @property
+    def settings(self): return self._config
+    def get_analysis_instance(self, name): return ANALYSIS_REGISTRY[name]()
+    def get_plot_instance(self, name): return PLOT_REGISTRY[name]()
