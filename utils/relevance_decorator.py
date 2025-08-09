@@ -4,7 +4,7 @@ Adds practical relevance check to analysis results based on limits and threshold
 
 from typing import Callable
 import pandas as pd
-from types_custom import AnalysisResult
+from .types_custom import AnalysisResult
 
 def relevance_decorator(
     lower_limit: float, upper_limit: float, threshold: float = 0.2

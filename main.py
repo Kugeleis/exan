@@ -1,14 +1,14 @@
-from config_loader import ConfigLoader
+from utils.config_loader import ConfigLoader
 import logging
 import pandas as pd
-from relevance_decorator import relevance_decorator
+from utils.relevance_decorator import relevance_decorator
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 def main():
     loader = ConfigLoader("config.yaml")
     config = loader.settings
-    df = pd.read_csv("data.csv")
+    df = pd.read_csv("data/fake.csv")
 
     group_col = config.group_col
     value_col = config.value_col

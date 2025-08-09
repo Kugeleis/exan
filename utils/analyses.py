@@ -3,13 +3,14 @@ analyses.py
 Defines statistical analysis modules. All classes implement a common `analyze` interface.
 """
 
+from abc import ABC
 from typing import Union
 import pandas as pd
 import numpy as np
 from scipy import stats
-from types_custom import AnalysisResult
+from .types_custom import AnalysisResult
 
-class Analysis:
+class Analysis(ABC):
     """
     Abstract base class for all statistical analysis types.
     """
