@@ -13,8 +13,8 @@ def main():
 
     group_col = config.group_col
     value_col = config.value_col
-    lower_limit = float(df[config.lower_limit_col].iloc[0])
-    upper_limit = float(df[config.upper_limit_col].iloc[0])
+    lower_limit = float(df[config.lower_limit_col].values[0])
+    upper_limit = float(df[config.upper_limit_col].values[0])
 
     num_groups = df[group_col].nunique()
     analyses_to_run = []
