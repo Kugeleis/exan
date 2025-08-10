@@ -18,8 +18,8 @@ output: "output"
     config_file = tmp_path / "config.yaml"
     config_file.write_text(config_content)
     loader = ConfigLoader(str(config_file))
-    assert isinstance(loader.settings, Box)
-    assert loader.settings.group_col == "group"
+    assert isinstance(loader.settings, dict)
+    assert loader.settings["group_col"] == "group"
 
 def test_config_loader_raises_error_on_missing_key(tmp_path):
     config_content = """

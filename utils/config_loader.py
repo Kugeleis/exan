@@ -1,5 +1,4 @@
 from pathlib import Path
-from box import Box
 import importlib
 import pkgutil
 from .analysis_registry import ANALYSIS_REGISTRY
