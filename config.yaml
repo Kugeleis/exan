@@ -1,7 +1,7 @@
-group_col: "Group"
-value_col: "Value"
-lower_limit_col: "Lower_Limit"
-upper_limit_col: "Upper_Limit"
+group_col: Group
+value_col: Value
+lower_limit_col: Lower_Limit
+upper_limit_col: Upper_Limit
 
 preprocessing:
   outlier_removal:

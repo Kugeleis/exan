@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+from .plot_registry import register_plot
 
 class Plot:
     """Base class for all plot types."""
@@ -20,6 +21,7 @@ class Plot:
     ) -> go.Figure:
         raise NotImplementedError
 
+@register_plot
 class BoxPlot(Plot):
     """Interactive box plot of all groups."""
     def plot(self, df: pd.DataFrame, group_col: str, value_col: str,
@@ -30,9 +32,10 @@ class BoxPlot(Plot):
             fig.add_hline(y=lower_limit, line_dash="dash", line_color="red")
         if upper_limit is not None:
             fig.add_hline(y=upper_limit, line_dash="dash", line_color="red")
-        fig.show()
+        fig.write_html("boxplot.html")
         return fig
 
+@register_plot
 class CumulativeFrequencyPlot(Plot):
     """Cumulative frequency plot for each group."""
     def plot(self, df: pd.DataFrame, group_col: str, value_col: str,
@@ -47,5 +50,5 @@ class CumulativeFrequencyPlot(Plot):
             fig.add_vline(x=lower_limit, line_dash="dash", line_color="red")
         if upper_limit is not None:
             fig.add_vline(x=upper_limit, line_dash="dash", line_color="red")
-        fig.show()
+        fig.write_html("cumulative_frequency_plot.html")
         return fig

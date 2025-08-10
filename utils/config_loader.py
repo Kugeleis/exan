@@ -2,19 +2,21 @@ from pathlib import Path
 from box import Box
 import importlib
 import pkgutil
-from utils.analysis_registry import ANALYSIS_REGISTRY
-from utils.plot_registry import PLOT_REGISTRY
+from .analysis_registry import ANALYSIS_REGISTRY
+from .plot_registry import PLOT_REGISTRY
 
 class ConfigLoader:
     def __init__(self, config_file: str = "config.yaml"):
         self.config_file = Path(config_file)
-        self._config: Box = self._load()
+        self._config: dict = self._load()
         self._validate()
         self._autoimport('utils.analyses')
         self._autoimport('utils.plots')
 
-    def _load(self) -> Box:
-        return Box().from_yaml(filename=self.config_file)
+    def _load(self) -> dict:
+        import yaml
+        with open(self.config_file) as f:
+            return yaml.safe_load(f)
 
     def _validate(self):
         for key in ["group_col","value_col","lower_limit_col","upper_limit_col","analyses","plots","output"]:
@@ -26,7 +28,7 @@ class ConfigLoader:
         path = Path(__file__).parent / "utils"
         for _, modname, ispkg in pkgutil.iter_modules([str(path)]):
             if not ispkg:
-                importlib.import_module(f"{pkg}.{modname}")
+                importlib.import_module(f".{modname}", __package__)
 
     @property
     def settings(self): return self._config
