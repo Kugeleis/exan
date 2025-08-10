@@ -22,5 +22,5 @@ output:
   save_interactive_html: true
   save_static_html: true
   save_pdf: true
-  output_directory: "output"
-  filename_prefix: "analysis_plot"
+  output_directory: output
+  filename_prefix: analysis_plot

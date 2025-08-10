@@ -3,6 +3,7 @@ import logging
 import pandas as pd
 from utils.relevance_decorator import relevance_decorator
 from utils.analyses import AnovaAnalysis, TTestAnalysis, MannWhitneyAnalysis
+from utils.reporting import generate_html_report
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -40,10 +41,17 @@ def main():
         result = func(df, group_col, value_col)
         logging.info(f"{analysis_cls.__name__}: {result}")
 
-    output_config = config.get('output', {})
+    figures = []
+    plot_names = []
     for plot_cfg in config['plots']:
         plotter = loader.get_plot_instance(plot_cfg['name'])
-        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, output_config=output_config)
+        fig = plotter.plot(df, group_col, value_col, lower_limit, upper_limit)
+        figures.append(fig)
+        plot_names.append(plot_cfg['name'])
+
+    output_config = config.get('output', {})
+    if output_config.get("save_interactive_html"):
+        generate_html_report(figures, plot_names, output_config)
 
 if __name__ == "__main__":
     main()
