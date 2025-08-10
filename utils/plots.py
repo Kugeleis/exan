@@ -43,7 +43,7 @@ class Plot:
         if save_interactive:
             fig.write_html(output_dir / f"{filename}.html")
         if save_static:
-            fig.write_image(output_dir / f"{filename}.html", format="html", engine="kaleido")
+            fig.write_image(output_dir / f"{filename}.png", format="png", engine="kaleido")
         if save_pdf:
             fig.write_image(output_dir / f"{filename}.pdf", format="pdf", engine="kaleido")
 
