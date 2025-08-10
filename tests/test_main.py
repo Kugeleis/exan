@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 import pandas as pd
+from box import Box
 import main
 from utils.analyses import AnovaAnalysis, TTestAnalysis, MannWhitneyAnalysis
 
@@ -8,12 +9,14 @@ from utils.analyses import AnovaAnalysis, TTestAnalysis, MannWhitneyAnalysis
 def mock_config_loader():
     with patch('main.ConfigLoader') as mock:
         instance = mock.return_value
-        instance.settings.group_col = 'group'
-        instance.settings.value_col = 'value'
-        instance.settings.lower_limit_col = 'lower'
-        instance.settings.upper_limit_col = 'upper'
-        instance.settings.analyses = []
-        instance.settings.plots = []
+        instance.settings = Box({
+            'group_col': 'group',
+            'value_col': 'value',
+            'lower_limit_col': 'lower',
+            'upper_limit_col': 'upper',
+            'analyses': [],
+            'plots': []
+        })
         yield mock
 
 def create_mock_df(num_groups):
