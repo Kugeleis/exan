@@ -24,8 +24,8 @@ def main():
         analyses_to_run = [AnovaAnalysis]
 
     # Check if relevance decorator should be applied
-    apply_relevance = any(getattr(analysis_cfg, "relevance", False) for analysis_cfg in config.analyses)
-    relevance_threshold = next((getattr(analysis_cfg, "relevance_threshold", 0.2) for analysis_cfg in config.analyses if hasattr(analysis_cfg, "relevance_threshold")), 0.2)
+    apply_relevance = any(getattr(analysis_cfg, "relevance", False) for analysis_cfg in config["analyses"])
+    relevance_threshold = next((getattr(analysis_cfg, "relevance_threshold", 0.2) for analysis_cfg in config["analyses"] if hasattr(analysis_cfg, "relevance_threshold")), 0.2)
 
 
     for analysis_cls in analyses_to_run:
