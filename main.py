@@ -24,8 +24,8 @@ def main():
         analyses_to_run = [AnovaAnalysis]
 
     # Check if relevance decorator should be applied
-    apply_relevance = any(getattr(analysis_cfg, "relevance", False) for analysis_cfg in config["analyses"])
-    relevance_threshold = next((getattr(analysis_cfg, "relevance_threshold", 0.2) for analysis_cfg in config["analyses"] if hasattr(analysis_cfg, "relevance_threshold")), 0.2)
+    apply_relevance = any(analysis_cfg.get("relevance", False) for analysis_cfg in config['analyses'])
+    relevance_threshold = next((analysis_cfg.get("relevance_threshold", 0.2) for analysis_cfg in config['analyses'] if "relevance_threshold" in analysis_cfg), 0.2)
 
 
     for analysis_cls in analyses_to_run:
@@ -40,9 +40,10 @@ def main():
         result = func(df, group_col, value_col)
         logging.info(f"{analysis_cls.__name__}: {result}")
 
+    output_config = config.get('output', {})
     for plot_cfg in config['plots']:
         plotter = loader.get_plot_instance(plot_cfg['name'])
-        plotter.plot(df, group_col, value_col, lower_limit, upper_limit)
+        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, output_config=output_config)
 
 if __name__ == "__main__":
     main()
