@@ -40,9 +40,10 @@ def main():
         result = func(df, group_col, value_col)
         logging.info(f"{analysis_cls.__name__}: {result}")
 
+    output_config = config.get('output', {})
     for plot_cfg in config['plots']:
         plotter = loader.get_plot_instance(plot_cfg['name'])
-        plotter.plot(df, group_col, value_col, lower_limit, upper_limit)
+        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, output_config=output_config)
 
 if __name__ == "__main__":
     main()
