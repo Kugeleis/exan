@@ -34,5 +34,6 @@ def filter_outliers(
         return group[(group[value_col] >= lower) & (group[value_col] <= upper)]
 
     # Apply filtering per group
-    filtered_df = df.groupby(group_col, group_keys=False).apply(_filter_group)
+    filtered_subset = df.groupby(group_col, group_keys=False).apply(_filter_group, include_groups=False)
+    filtered_df = df.loc[filtered_subset.index]
     return filtered_df.reset_index(drop=True)
