@@ -16,7 +16,9 @@ analyses:
     relevance: false
 
 plots:
-  - name: "BoxPlot"
+  - name: BoxPlot
+  - name: CumulativeFrequencyPlot
+    
 
 output:
   save_interactive_html: true
