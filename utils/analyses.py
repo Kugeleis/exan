@@ -4,7 +4,6 @@ Defines statistical analysis modules. All classes implement a common `analyze` i
 """
 
 from abc import ABC
-from typing import Union
 import pandas as pd
 import numpy as np
 from scipy import stats
