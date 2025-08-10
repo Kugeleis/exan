@@ -10,7 +10,7 @@ import numpy as np
 from scipy import stats
 from scipy.stats._result_classes import TtestResult
 from .types_custom import AnalysisResult
-from analysis_registry import register_analysis
+from .analysis_registry import register_analysis
 
 
 class Analysis(ABC):
