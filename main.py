@@ -7,7 +7,7 @@ from utils.reporting import generate_report
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-def main():
+def main() -> None:
     loader = ConfigLoader("config.yaml")
     config = loader.settings
     df = pd.read_csv("data/fake.csv")
@@ -41,13 +41,12 @@ def main():
         result = func(df, group_col, value_col)
         logging.info(f"{analysis_cls.__name__}: {result}")
 
-    figures = []
-    plot_names = []
+    plots = {}
     for plot_cfg in config['plots']:
-        plotter = loader.get_plot_instance(plot_cfg['name'])
+        plot_name = plot_cfg['name']
+        plotter = loader.get_plot_instance(plot_name)
         fig = plotter.plot(df, group_col, value_col, lower_limit, upper_limit)
-        figures.append(fig)
-        plot_names.append(plot_cfg['name'])
+        plots[plot_name] = fig
 
     output_config = config.get("output", {})
     if (
@@ -55,7 +54,7 @@ def main():
         or output_config.get("save_static_html")
         or output_config.get("save_pdf")
     ):
-        generate_report(figures, plot_names, config)
+        generate_report(plots, config)
 
 if __name__ == "__main__":
     main()
