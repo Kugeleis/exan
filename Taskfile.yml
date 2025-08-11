@@ -1,0 +1,37 @@
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task: run
+
+  init:
+    desc: "Initialize the virtual environment and install dependencies"
+    cmds:
+      - uv venv
+      - uv pip sync pyproject.toml
+
+  install:
+    desc: "Install dependencies"
+    cmds:
+      - uv pip sync pyproject.toml
+
+  lint:
+    desc: "Lint the code with ruff"
+    cmds:
+      - uv run ruff .
+
+  test:
+    desc: "Run tests with pytest"
+    cmds:
+      - uv run pytest
+
+  run:
+    desc: "Run the main analysis script"
+    cmds:
+      - uv run python main.py
+
+  clean:
+    desc: "Remove the output directory"
+    cmds:
+      - rm -rf output
