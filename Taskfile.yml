@@ -32,6 +32,6 @@ tasks:
       - uv run python main.py
 
   clean:
-    desc: "Remove the output directory"
+    desc: "Remove the contents of the output directory (cross-platform)"
     cmds:
-      - rm -rf output
+      - uv run python scripts/clean.py
