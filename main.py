@@ -7,7 +7,7 @@ from utils.reporting import generate_report
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-def main():
+def main() -> None:
     loader = ConfigLoader("config.yaml")
     config = loader.settings
     df = pd.read_csv("data/fake.csv")

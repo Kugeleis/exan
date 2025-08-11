@@ -1,4 +1,4 @@
-from typing import TypedDict, List
+from typing import TypedDict
 
 class AnalysisResult(TypedDict, total=False):
     test: str
@@ -9,5 +9,5 @@ class AnalysisResult(TypedDict, total=False):
     significant: bool
     relevance: bool
     message: str
-    mean_values: List[float]
+    mean_values: list[float]
     error: str

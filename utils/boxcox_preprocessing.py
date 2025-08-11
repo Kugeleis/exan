@@ -3,16 +3,15 @@ boxcox_preprocessing.py
 Module providing iterative Box-Cox transformation utilities for data normalization.
 """
 
-from typing import Tuple, Optional
 import numpy as np
 import pandas as pd
 from scipy.stats import boxcox, boxcox_normmax
 
 def boxcox_transform(
     data: pd.Series,
-    lmbda: Optional[float] = None,
+    lmbda: float | None = None,
     offset: float = 1e-6
-) -> Tuple[np.ndarray, float]:
+) -> tuple[np.ndarray, float]:
     """
     Transforms data using Box-Cox transformation.
     If lambda is None, finds optimal lambda via maximum likelihood estimation.
@@ -44,10 +43,10 @@ def boxcox_transform(
 def apply_boxcox_preprocessing(
     df: pd.DataFrame,
     value_col: str,
-    group_col: Optional[str] = None,
+    group_col: str | None = None,
     offset: float = 1e-6,
     global_transform: bool = False
-) -> Tuple[pd.DataFrame, dict]:
+) -> tuple[pd.DataFrame, dict]:
     """
     Applies Box-Cox transformation on data, either globally or separately per group.
 

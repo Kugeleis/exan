@@ -1,4 +1,3 @@
-from typing import Dict
 import plotly.graph_objects as go
 from pathlib import Path
 from fpdf import FPDF
@@ -8,7 +7,7 @@ from abc import ABC, abstractmethod
 
 
 class ReportGenerator(ABC):
-    def __init__(self, plots: Dict[str, go.Figure], config: dict):
+    def __init__(self, plots: dict[str, go.Figure], config: dict):
         self.plots = plots
         self.config = config
         self.output_config = self.config.get("output", {})
@@ -86,7 +85,7 @@ class PDFReportGenerator(ReportGenerator):
         pdf.output(str(pdf_filename))
 
 
-def report_generator_factory(format: str, plots: Dict[str, go.Figure], config: dict) -> ReportGenerator:
+def report_generator_factory(format: str, plots: dict[str, go.Figure], config: dict) -> ReportGenerator:
     if format == "interactive_html":
         return InteractiveHTMLReportGenerator(plots, config)
     elif format == "static_html":
@@ -97,7 +96,7 @@ def report_generator_factory(format: str, plots: Dict[str, go.Figure], config: d
         raise ValueError(f"Unknown report format: {format}")
 
 
-def generate_report(plots: Dict[str, go.Figure], config: dict):
+def generate_report(plots: dict[str, go.Figure], config: dict):
     """
     Generates a report containing multiple plots in various formats.
     """
