@@ -20,6 +20,11 @@ def generate_report(figures: List[go.Figure], plot_names: List[str], config: dic
         with open(filename, 'w') as f:
             f.write("<html><head><title>Analysis Report</title></head><body>")
             f.write("<h1>Analysis Report</h1>")
+            f.write("<h2>Report Information</h2>")
+            f.write("<ul>")
+            for key, value in report_config.items():
+                f.write(f"<li><strong>{key}:</strong> {value}</li>")
+            f.write("</ul>")
             for fig, name in zip(figures, plot_names):
                 f.write(f"<h2>{name}</h2>")
                 f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
@@ -30,6 +35,11 @@ def generate_report(figures: List[go.Figure], plot_names: List[str], config: dic
         with open(filename, 'w') as f:
             f.write("<html><head><title>Static Analysis Report</title></head><body>")
             f.write("<h1>Static Analysis Report</h1>")
+            f.write("<h2>Report Information</h2>")
+            f.write("<ul>")
+            for key, value in report_config.items():
+                f.write(f"<li><strong>{key}:</strong> {value}</li>")
+            f.write("</ul>")
             for fig, name in zip(figures, plot_names):
                 f.write(f"<h2>{name}</h2>")
                 f.write(fig.to_html(full_html=False, include_plotlyjs=False))
@@ -38,6 +48,16 @@ def generate_report(figures: List[go.Figure], plot_names: List[str], config: dic
     if output_config.get("save_pdf"):
         pdf = FPDF()
         pdf.set_auto_page_break(auto=True, margin=15)
+
+        # Title Page
+        pdf.add_page()
+        pdf.set_font("Arial", "B", 24)
+        pdf.cell(0, 20, "Analysis Report", 0, 1, "C")
+        pdf.set_font("Arial", "B", 16)
+        pdf.cell(0, 15, "Report Information", 0, 1, "L")
+        pdf.set_font("Arial", "", 12)
+        for key, value in report_config.items():
+            pdf.cell(0, 10, f"  {key}: {value}", 0, 1, "L")
 
         for fig, name in zip(figures, plot_names):
             with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_image:

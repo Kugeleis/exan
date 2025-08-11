@@ -44,6 +44,8 @@ def test_generate_report(mock_os_remove, mock_tempfile, mock_fpdf, mock_write_im
     # Check that the HTML content is written correctly
     handle.write.assert_any_call("<html><head><title>Analysis Report</title></head><body>")
     handle.write.assert_any_call("<h1>Analysis Report</h1>")
+    handle.write.assert_any_call("<h2>Report Information</h2>")
+    handle.write.assert_any_call("<li><strong>name:</strong> my_test_report</li>")
     handle.write.assert_any_call("<h2>Plot 1</h2>")
     handle.write.assert_any_call("<h2>Plot 2</h2>")
     handle.write.assert_any_call("</body></html>")
@@ -53,7 +55,9 @@ def test_generate_report(mock_os_remove, mock_tempfile, mock_fpdf, mock_write_im
     assert mock_write_image.call_count == 2
 
     pdf_instance = mock_fpdf.return_value
-    assert pdf_instance.add_page.call_count == 2
+    assert pdf_instance.add_page.call_count == 3  # Title page + 2 plots
+    pdf_instance.cell.assert_any_call(0, 15, "Report Information", 0, 1, "L")
+    pdf_instance.cell.assert_any_call(0, 10, "  name: my_test_report", 0, 1, "L")
     assert pdf_instance.image.call_count == 2
 
     final_pdf_filename = Path("test_report_output/my_test_report.pdf")
