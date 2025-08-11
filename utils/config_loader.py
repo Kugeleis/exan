@@ -8,13 +8,10 @@ from .plot_registry import PLOT_REGISTRY
 class ConfigLoader:
     def __init__(self, config_file: str = "config.yaml"):
         self.config_file = Path(config_file)
-        self._config: Box = self._load()
+        self._config: Box = Box.from_yaml(filename=self.config_file)
         self._validate()
         self._autoimport('utils.analyses')
         self._autoimport('utils.plots')
-
-    def _load(self) -> Box:
-        return Box.from_yaml(filename=self.config_file)
 
     def _validate(self):
         for key in ["group_col","value_col","lower_limit_col","upper_limit_col","analyses","plots","output", "report"]:
