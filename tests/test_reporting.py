@@ -7,7 +7,10 @@ from utils.reporting import generate_report
 @patch('pathlib.Path.mkdir')
 @patch('builtins.open', new_callable=mock_open)
 @patch('plotly.graph_objects.Figure.write_image')
-def test_generate_report(mock_write_image, mock_file_open, mock_mkdir):
+@patch('utils.reporting.FPDF')
+@patch('utils.reporting.tempfile.NamedTemporaryFile')
+@patch('utils.reporting.os.remove')
+def test_generate_report(mock_os_remove, mock_tempfile, mock_fpdf, mock_write_image, mock_file_open, mock_mkdir):
     figures = [go.Figure(), go.Figure()]
     plot_names = ["Plot 1", "Plot 2"]
     config = {
@@ -46,7 +49,12 @@ def test_generate_report(mock_write_image, mock_file_open, mock_mkdir):
     handle.write.assert_any_call("</body></html>")
 
     # Check for pdf calls
-    pdf_filename_1 = "test_report_output/my_test_report_Plot 1.pdf"
-    pdf_filename_2 = "test_report_output/my_test_report_Plot 2.pdf"
-    mock_write_image.assert_any_call(str(Path(pdf_filename_1)))
-    mock_write_image.assert_any_call(str(Path(pdf_filename_2)))
+    mock_fpdf.assert_called_once()
+    assert mock_write_image.call_count == 2
+
+    pdf_instance = mock_fpdf.return_value
+    assert pdf_instance.add_page.call_count == 2
+    assert pdf_instance.image.call_count == 2
+
+    final_pdf_filename = Path("test_report_output/my_test_report.pdf")
+    pdf_instance.output.assert_called_once_with(str(final_pdf_filename))

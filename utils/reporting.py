@@ -1,6 +1,9 @@
 from typing import List
 import plotly.graph_objects as go
 from pathlib import Path
+from fpdf import FPDF
+import tempfile
+import os
 
 def generate_report(figures: List[go.Figure], plot_names: List[str], config: dict):
     """
@@ -33,6 +36,19 @@ def generate_report(figures: List[go.Figure], plot_names: List[str], config: dic
             f.write("</body></html>")
 
     if output_config.get("save_pdf"):
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+
         for fig, name in zip(figures, plot_names):
-            filename = output_dir / f"{prefix}_{name}.pdf"
-            fig.write_image(str(filename))
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_image:
+                fig.write_image(temp_image.name)
+
+                pdf.add_page()
+                pdf.set_font("Arial", "B", 16)
+                pdf.cell(0, 10, name, 0, 1, "C")
+                pdf.image(temp_image.name, x=10, y=30, w=190)
+
+            os.remove(temp_image.name)
+
+        pdf_filename = output_dir / f"{prefix}.pdf"
+        pdf.output(str(pdf_filename))
