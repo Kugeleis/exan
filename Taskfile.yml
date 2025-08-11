@@ -9,12 +9,11 @@ tasks:
     desc: "Initialize the virtual environment and install dependencies"
     cmds:
       - uv venv
-      - uv pip sync pyproject.toml
 
-  install:
-    desc: "Install dependencies"
+  update:
+    desc: "Update dependencies"
     cmds:
-      - uv pip sync pyproject.toml
+      - uv sync --upgrade
 
   lint:
     desc: "Lint the code with ruff"
