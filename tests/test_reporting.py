@@ -10,9 +10,11 @@ from utils.reporting import (
 )
 from pathlib import Path
 
+from box import Box
+
 @pytest.fixture
 def mock_config():
-    return {
+    return Box({
         "output": {
             "output_directory": "test_report_output",
             "save_interactive_html": True,
@@ -20,7 +22,7 @@ def mock_config():
             "save_pdf": True,
         },
         "report": {"name": "my_test_report"},
-    }
+    })
 
 @pytest.fixture
 def mock_plots():

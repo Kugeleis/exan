@@ -1,27 +1,26 @@
 from pathlib import Path
 import importlib
 import pkgutil
+from box import Box
 from .analysis_registry import ANALYSIS_REGISTRY
 from .plot_registry import PLOT_REGISTRY
 
 class ConfigLoader:
     def __init__(self, config_file: str = "config.yaml"):
         self.config_file = Path(config_file)
-        self._config: dict = self._load()
+        self._config: Box = self._load()
         self._validate()
         self._autoimport('utils.analyses')
         self._autoimport('utils.plots')
 
-    def _load(self) -> dict:
-        import yaml
-        with open(self.config_file) as f:
-            return yaml.safe_load(f)
+    def _load(self) -> Box:
+        return Box.from_yaml(filename=self.config_file)
 
     def _validate(self):
         for key in ["group_col","value_col","lower_limit_col","upper_limit_col","analyses","plots","output", "report"]:
             if key not in self._config:
                 raise KeyError(f"Missing key: {key}")
-        if "name" not in self._config["report"]:
+        if "name" not in self._config.report:
             raise KeyError("Missing key: name in report section")
 
     def _autoimport(self, pkg):
