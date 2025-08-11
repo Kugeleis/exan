@@ -2,13 +2,15 @@ from typing import List
 import plotly.graph_objects as go
 from pathlib import Path
 
-def generate_report(figures: List[go.Figure], plot_names: List[str], output_config: dict):
+def generate_report(figures: List[go.Figure], plot_names: List[str], config: dict):
     """
     Generates a report containing multiple plots in various formats.
     """
+    output_config = config.get("output", {})
+    report_config = config.get("report", {})
     output_dir = Path(output_config.get("output_directory", "output"))
     output_dir.mkdir(parents=True, exist_ok=True)
-    prefix = output_config.get("filename_prefix", "report")
+    prefix = report_config.get("name", "report")
 
     if output_config.get("save_interactive_html"):
         filename = output_dir / f"{prefix}.html"

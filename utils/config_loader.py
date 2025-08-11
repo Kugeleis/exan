@@ -18,9 +18,11 @@ class ConfigLoader:
             return yaml.safe_load(f)
 
     def _validate(self):
-        for key in ["group_col","value_col","lower_limit_col","upper_limit_col","analyses","plots","output"]:
+        for key in ["group_col","value_col","lower_limit_col","upper_limit_col","analyses","plots","output", "report"]:
             if key not in self._config:
                 raise KeyError(f"Missing key: {key}")
+        if "name" not in self._config["report"]:
+            raise KeyError("Missing key: name in report section")
 
     def _autoimport(self, pkg):
         package = importlib.import_module(pkg)

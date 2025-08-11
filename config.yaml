@@ -25,4 +25,6 @@ output:
   save_static_html: true
   save_pdf: true
   output_directory: output
-  filename_prefix: analysis_plot
+
+report:
+  name: analysis_plot

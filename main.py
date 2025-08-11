@@ -49,13 +49,13 @@ def main():
         figures.append(fig)
         plot_names.append(plot_cfg['name'])
 
-    output_config = config.get('output', {})
+    output_config = config.get("output", {})
     if (
         output_config.get("save_interactive_html")
         or output_config.get("save_static_html")
         or output_config.get("save_pdf")
     ):
-        generate_report(figures, plot_names, output_config)
+        generate_report(figures, plot_names, config)
 
 if __name__ == "__main__":
     main()

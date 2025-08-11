@@ -10,23 +10,27 @@ from utils.reporting import generate_report
 def test_generate_report(mock_write_image, mock_file_open, mock_mkdir):
     figures = [go.Figure(), go.Figure()]
     plot_names = ["Plot 1", "Plot 2"]
-    output_config = {
-        "output_directory": "test_report_output",
-        "filename_prefix": "test_report",
-        "save_interactive_html": True,
-        "save_static_html": True,
-        "save_pdf": True,
+    config = {
+        "output": {
+            "output_directory": "test_report_output",
+            "save_interactive_html": True,
+            "save_static_html": True,
+            "save_pdf": True,
+        },
+        "report": {
+            "name": "my_test_report"
+        }
     }
 
-    generate_report(figures, plot_names, output_config)
+    generate_report(figures, plot_names, config)
 
     mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
 
     from pathlib import Path
     # Check for interactive html
-    interactive_filename = Path("test_report_output/test_report.html")
+    interactive_filename = Path("test_report_output/my_test_report.html")
     # Check for static html
-    static_filename = Path("test_report_output/test_report_static.html")
+    static_filename = Path("test_report_output/my_test_report_static.html")
 
     # Check that open was called for html files
     mock_file_open.assert_any_call(interactive_filename, 'w')
@@ -42,7 +46,7 @@ def test_generate_report(mock_write_image, mock_file_open, mock_mkdir):
     handle.write.assert_any_call("</body></html>")
 
     # Check for pdf calls
-    pdf_filename_1 = "test_report_output/test_report_Plot 1.pdf"
-    pdf_filename_2 = "test_report_output/test_report_Plot 2.pdf"
+    pdf_filename_1 = "test_report_output/my_test_report_Plot 1.pdf"
+    pdf_filename_2 = "test_report_output/my_test_report_Plot 2.pdf"
     mock_write_image.assert_any_call(str(Path(pdf_filename_1)))
     mock_write_image.assert_any_call(str(Path(pdf_filename_2)))
