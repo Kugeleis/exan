@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict
 import plotly.graph_objects as go
 from pathlib import Path
 from fpdf import FPDF
@@ -8,9 +8,8 @@ from abc import ABC, abstractmethod
 
 
 class ReportGenerator(ABC):
-    def __init__(self, figures: List[go.Figure], plot_names: List[str], config: dict):
-        self.figures = figures
-        self.plot_names = plot_names
+    def __init__(self, plots: Dict[str, go.Figure], config: dict):
+        self.plots = plots
         self.config = config
         self.output_config = self.config.get("output", {})
         self.report_config = self.config.get("report", {})
@@ -34,7 +33,7 @@ class InteractiveHTMLReportGenerator(ReportGenerator):
             for key, value in self.report_config.items():
                 f.write(f"<li><strong>{key}:</strong> {value}</li>")
             f.write("</ul>")
-            for fig, name in zip(self.figures, self.plot_names):
+            for name, fig in self.plots.items():
                 f.write(f"<h2>{name}</h2>")
                 f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
             f.write("</body></html>")
@@ -51,7 +50,7 @@ class StaticHTMLReportGenerator(ReportGenerator):
             for key, value in self.report_config.items():
                 f.write(f"<li><strong>{key}:</strong> {value}</li>")
             f.write("</ul>")
-            for fig, name in zip(self.figures, self.plot_names):
+            for name, fig in self.plots.items():
                 f.write(f"<h2>{name}</h2>")
                 f.write(fig.to_html(full_html=False, include_plotlyjs=False))
             f.write("</body></html>")
@@ -72,7 +71,7 @@ class PDFReportGenerator(ReportGenerator):
         for key, value in self.report_config.items():
             pdf.cell(0, 10, f"  {key}: {value}", 0, 1, "L")
 
-        for fig, name in zip(self.figures, self.plot_names):
+        for name, fig in self.plots.items():
             with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_image:
                 fig.write_image(temp_image.name)
 
@@ -87,18 +86,18 @@ class PDFReportGenerator(ReportGenerator):
         pdf.output(str(pdf_filename))
 
 
-def report_generator_factory(format: str, figures: List[go.Figure], plot_names: List[str], config: dict) -> ReportGenerator:
+def report_generator_factory(format: str, plots: Dict[str, go.Figure], config: dict) -> ReportGenerator:
     if format == "interactive_html":
-        return InteractiveHTMLReportGenerator(figures, plot_names, config)
+        return InteractiveHTMLReportGenerator(plots, config)
     elif format == "static_html":
-        return StaticHTMLReportGenerator(figures, plot_names, config)
+        return StaticHTMLReportGenerator(plots, config)
     elif format == "pdf":
-        return PDFReportGenerator(figures, plot_names, config)
+        return PDFReportGenerator(plots, config)
     else:
         raise ValueError(f"Unknown report format: {format}")
 
 
-def generate_report(figures: List[go.Figure], plot_names: List[str], config: dict):
+def generate_report(plots: Dict[str, go.Figure], config: dict):
     """
     Generates a report containing multiple plots in various formats.
     """
@@ -113,5 +112,5 @@ def generate_report(figures: List[go.Figure], plot_names: List[str], config: dic
         report_formats.append("pdf")
 
     for format in report_formats:
-        generator = report_generator_factory(format, figures, plot_names, config)
+        generator = report_generator_factory(format, plots, config)
         generator.generate()

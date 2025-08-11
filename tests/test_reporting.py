@@ -23,17 +23,16 @@ def mock_config():
     }
 
 @pytest.fixture
-def mock_figures():
-    return [go.Figure(), go.Figure()]
-
-@pytest.fixture
-def mock_plot_names():
-    return ["Plot 1", "Plot 2"]
+def mock_plots():
+    return {
+        "Plot 1": go.Figure(),
+        "Plot 2": go.Figure(),
+    }
 
 @patch("pathlib.Path.mkdir")
 @patch("builtins.open", new_callable=mock_open)
-def test_interactive_html_report_generator(mock_file_open, mock_mkdir, mock_figures, mock_plot_names, mock_config):
-    generator = InteractiveHTMLReportGenerator(mock_figures, mock_plot_names, mock_config)
+def test_interactive_html_report_generator(mock_file_open, mock_mkdir, mock_plots, mock_config):
+    generator = InteractiveHTMLReportGenerator(mock_plots, mock_config)
     generator.generate()
 
     mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
@@ -45,8 +44,8 @@ def test_interactive_html_report_generator(mock_file_open, mock_mkdir, mock_figu
 
 @patch("pathlib.Path.mkdir")
 @patch("builtins.open", new_callable=mock_open)
-def test_static_html_report_generator(mock_file_open, mock_mkdir, mock_figures, mock_plot_names, mock_config):
-    generator = StaticHTMLReportGenerator(mock_figures, mock_plot_names, mock_config)
+def test_static_html_report_generator(mock_file_open, mock_mkdir, mock_plots, mock_config):
+    generator = StaticHTMLReportGenerator(mock_plots, mock_config)
     generator.generate()
 
     mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
@@ -62,13 +61,13 @@ def test_static_html_report_generator(mock_file_open, mock_mkdir, mock_figures, 
 @patch("plotly.graph_objects.Figure.write_image")
 @patch("utils.reporting.tempfile.NamedTemporaryFile")
 @patch("utils.reporting.os.remove")
-def test_pdf_report_generator(mock_os_remove, mock_tempfile, mock_write_image, mock_fpdf, mock_mkdir, mock_figures, mock_plot_names, mock_config):
+def test_pdf_report_generator(mock_os_remove, mock_tempfile, mock_write_image, mock_fpdf, mock_mkdir, mock_plots, mock_config):
     # Mock the temporary file context manager
     mock_temp_file_instance = MagicMock()
     mock_temp_file_instance.__enter__.return_value.name = "temp_image.png"
     mock_tempfile.return_value = mock_temp_file_instance
 
-    generator = PDFReportGenerator(mock_figures, mock_plot_names, mock_config)
+    generator = PDFReportGenerator(mock_plots, mock_config)
     generator.generate()
 
     mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
@@ -79,27 +78,27 @@ def test_pdf_report_generator(mock_os_remove, mock_tempfile, mock_write_image, m
     pdf_instance.output.assert_called_once_with(str(Path("test_report_output/my_test_report.pdf")))
 
 
-def test_report_generator_factory(mock_figures, mock_plot_names, mock_config):
-    interactive_gen = report_generator_factory("interactive_html", mock_figures, mock_plot_names, mock_config)
+def test_report_generator_factory(mock_plots, mock_config):
+    interactive_gen = report_generator_factory("interactive_html", mock_plots, mock_config)
     assert isinstance(interactive_gen, InteractiveHTMLReportGenerator)
 
-    static_gen = report_generator_factory("static_html", mock_figures, mock_plot_names, mock_config)
+    static_gen = report_generator_factory("static_html", mock_plots, mock_config)
     assert isinstance(static_gen, StaticHTMLReportGenerator)
 
-    pdf_gen = report_generator_factory("pdf", mock_figures, mock_plot_names, mock_config)
+    pdf_gen = report_generator_factory("pdf", mock_plots, mock_config)
     assert isinstance(pdf_gen, PDFReportGenerator)
 
     with pytest.raises(ValueError):
-        report_generator_factory("unknown_format", mock_figures, mock_plot_names, mock_config)
+        report_generator_factory("unknown_format", mock_plots, mock_config)
 
 
 @patch("utils.reporting.report_generator_factory")
-def test_generate_report(mock_factory, mock_figures, mock_plot_names, mock_config):
+def test_generate_report(mock_factory, mock_plots, mock_config):
     mock_interactive_gen = MagicMock()
     mock_static_gen = MagicMock()
     mock_pdf_gen = MagicMock()
 
-    def side_effect(format, figures, plot_names, config):
+    def side_effect(format, plots, config):
         if format == "interactive_html":
             return mock_interactive_gen
         elif format == "static_html":
@@ -109,12 +108,12 @@ def test_generate_report(mock_factory, mock_figures, mock_plot_names, mock_confi
 
     mock_factory.side_effect = side_effect
 
-    generate_report(mock_figures, mock_plot_names, mock_config)
+    generate_report(mock_plots, mock_config)
 
     mock_factory.assert_has_calls([
-        call("interactive_html", mock_figures, mock_plot_names, mock_config),
-        call("static_html", mock_figures, mock_plot_names, mock_config),
-        call("pdf", mock_figures, mock_plot_names, mock_config)
+        call("interactive_html", mock_plots, mock_config),
+        call("static_html", mock_plots, mock_config),
+        call("pdf", mock_plots, mock_config)
     ])
 
     mock_interactive_gen.generate.assert_called_once()
