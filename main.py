@@ -10,12 +10,17 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 def main() -> None:
     loader = ConfigLoader("config.yaml")
     config = loader.settings
-    df = pd.read_csv("data/fake.csv")
+    with open("data/fake.csv", "r") as f:
+        lower_limit_line = f.readline()
+        upper_limit_line = f.readline()
+
+    lower_limit = float(lower_limit_line.split(",")[1])
+    upper_limit = float(upper_limit_line.split(",")[1])
+
+    df = pd.read_csv("data/fake.csv", skiprows=2)
 
     group_col = config.group_col
     value_col = config.value_col
-    lower_limit = float(df[config.lower_limit_col].iloc[0])
-    upper_limit = float(df[config.upper_limit_col].iloc[0])
 
     num_groups = df[group_col].nunique()
     analyses_to_run = []
