@@ -14,6 +14,8 @@ analyses:
 plots:
   - name: "BoxPlot"
 output: "output"
+report:
+  name: "test_report"
     """
     config_file = tmp_path / "config.yaml"
     config_file.write_text(config_content)
@@ -32,6 +34,8 @@ analyses:
 plots:
   - name: "BoxPlot"
 output: "output"
+report:
+  name: "test_report"
     """
     config_file = tmp_path / "config.yaml"
     config_file.write_text(config_content)
