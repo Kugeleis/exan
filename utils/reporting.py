@@ -10,11 +10,11 @@ class ReportGenerator(ABC):
     def __init__(self, plots: dict[str, go.Figure], config: dict):
         self.plots = plots
         self.config = config
-        self.output_config = self.config.get("output", {})
-        self.report_config = self.config.get("report", {})
-        self.output_dir = Path(self.output_config.get("output_directory", "output"))
+        self.output_config = self.config.output
+        self.report_config = self.config.report
+        self.output_dir = Path(self.output_config.output_directory)
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.prefix = self.report_config.get("name", "report")
+        self.prefix = self.report_config.name
 
     @abstractmethod
     def generate(self):
@@ -100,14 +100,14 @@ def generate_report(plots: dict[str, go.Figure], config: dict):
     """
     Generates a report containing multiple plots in various formats.
     """
-    output_config = config.get("output", {})
+    output_config = config.output
 
     report_formats = []
-    if output_config.get("save_interactive_html"):
+    if output_config.save_interactive_html:
         report_formats.append("interactive_html")
-    if output_config.get("save_static_html"):
+    if output_config.save_static_html:
         report_formats.append("static_html")
-    if output_config.get("save_pdf"):
+    if output_config.save_pdf:
         report_formats.append("pdf")
 
     for format in report_formats:
