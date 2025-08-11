@@ -1,5 +1,5 @@
-Lower_Limit,1.0
-Upper_Limit,3.0
+Value_Lower_Limit,1.0
+Value_Upper_Limit,3.0
 Group,Value,Data2
 A,2.13,1.23
 A,1.97,4.56

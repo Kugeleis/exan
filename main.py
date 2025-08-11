@@ -25,11 +25,12 @@ def main() -> None:
     group_col = config.group_col
     value_cols = [col for col in df.columns if col != group_col]
 
+    plots = {}
     for value_col in value_cols:
         logging.info(f"Processing column: {value_col}")
 
-        lower_limit = limits.get("Lower_Limit")
-        upper_limit = limits.get("Upper_Limit")
+        lower_limit = limits.get(f"{value_col}_Lower_Limit")
+        upper_limit = limits.get(f"{value_col}_Upper_Limit")
 
         num_groups = df[group_col].nunique()
         analyses_to_run = []
@@ -54,7 +55,6 @@ def main() -> None:
             result = func(df, group_col, value_col)
             logging.info(f"{analysis_cls.__name__} for {value_col}: {result}")
 
-        plots = {}
         for plot_cfg in config.plots:
             plot_name = f"{plot_cfg.name}_{value_col}"
             plotter = loader.get_plot_instance(plot_cfg.name)
