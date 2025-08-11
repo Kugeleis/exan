@@ -1,15 +1,17 @@
 import shutil
 from pathlib import Path
 import logging
+from box import Box
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+config = Box().from_yaml(filename="config.yaml")
 
-def clean_output_directory():
+def clean_output_directory(config: Box = config):
     """
     Removes all files and subdirectories within the 'output' directory
     without deleting the directory itself.
     """
-    output_dir = Path("output")
+    output_dir = Path(config.output.output_directory)
     if not output_dir.is_dir():
         logging.info(f"Output directory '{output_dir}' not found or is not a directory. Nothing to clean.")
         return
