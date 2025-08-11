@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 from utils.relevance_decorator import relevance_decorator
 from utils.analyses import AnovaAnalysis, TTestAnalysis, MannWhitneyAnalysis
-from utils.reporting import generate_html_report
+from utils.reporting import generate_report
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -50,8 +50,12 @@ def main():
         plot_names.append(plot_cfg['name'])
 
     output_config = config.get('output', {})
-    if output_config.get("save_interactive_html"):
-        generate_html_report(figures, plot_names, output_config)
+    if (
+        output_config.get("save_interactive_html")
+        or output_config.get("save_static_html")
+        or output_config.get("save_pdf")
+    ):
+        generate_report(figures, plot_names, output_config)
 
 if __name__ == "__main__":
     main()
