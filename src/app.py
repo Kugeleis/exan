@@ -2,8 +2,8 @@ import typer
 from typing_extensions import Annotated
 from pathlib import Path
 
-from utils.config_loader import ConfigLoader
-from main import run_analysis # This will be the refactored main function
+from src.utils.config_loader import ConfigLoader
+from src.main import run_analysis # This will be the refactored main function
 
 app = typer.Typer()
 

@@ -41,8 +41,8 @@ class ConfigLoader:
 
         self._style_config: Box = Box.from_yaml(filename=self.style_file)
         self._validate()
-        self._autoimport('utils.analyses')
-        self._autoimport('utils.plots')
+        self._autoimport('src.utils.analyses')
+        self._autoimport('src.utils.plots')
 
     def _validate(self):
         """
@@ -69,13 +69,13 @@ class ConfigLoader:
         Automatically imports modules within a specified package to trigger registration decorators.
 
         Args:
-            pkg (str): The name of the package to auto-import (e.g., 'utils.analyses').
+            pkg (str): The name of the package to auto-import (e.g., 'src.utils.analyses').
         """
         package = importlib.import_module(pkg)
-        path = Path(__file__).parent / "utils"
+        path = Path(__file__).parent
         for _, modname, ispkg in pkgutil.iter_modules([str(path)]):
             if not ispkg:
-                importlib.import_module(f".{modname}", __package__)
+                importlib.import_module(f".{modname}", pkg)
 
     @property
     def settings(self) -> Config:

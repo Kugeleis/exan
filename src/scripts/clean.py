@@ -1,11 +1,9 @@
 import shutil
-import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parents[1]))
 import logging
 
-from utils.config_loader import ConfigLoader
-from utils.types_custom import Config
+from src.utils.config_loader import ConfigLoader
+from src.utils.types_custom import Config
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
