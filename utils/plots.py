@@ -45,11 +45,11 @@ class BoxPlot(Plot):
             fig.add_trace(trace, row=row, col=col)
 
         if lower_limit is not None:
-            fig.add_hline(y=lower_limit, line_dash="dash", line_color="red", annotation_text="LSL", annotation_position="bottom right", row=row, col=col)
+            fig.add_hline(y=lower_limit, line_dash="dash", line_color="red", annotation_text="LSL", annotation_position="right", row=row, col=col, annotation_xshift=10)
         if upper_limit is not None:
-            fig.add_hline(y=upper_limit, line_dash="dash", line_color="red", annotation_text="USL", annotation_position="top right", row=row, col=col)
+            fig.add_hline(y=upper_limit, line_dash="dash", line_color="red", annotation_text="USL", annotation_position="right", row=row, col=col, annotation_xshift=10)
         if target_value is not None:
-            fig.add_hline(y=target_value, line_dash="dash", line_color="green", annotation_text="T", annotation_position="top left", row=row, col=col)
+            fig.add_hline(y=target_value, line_dash="dash", line_color="green", annotation_text="T", annotation_position="right", row=row, col=col, annotation_xshift=10)
         return fig
 
 @register_plot
@@ -72,11 +72,11 @@ class CumulativeFrequencyPlot(Plot):
             fig.add_trace(go.Scatter(x=vals, y=cum, mode="lines", name=str(g)), row=row, col=col)
 
         if lower_limit is not None:
-            fig.add_vline(x=lower_limit, line_dash="dash", line_color="red", annotation_text="LSL", annotation_position="bottom right", row=row, col=col)
+            fig.add_vline(x=lower_limit, line_dash="dash", line_color="red", annotation_text="LSL", annotation_position="top", row=row, col=col, annotation_yshift=10)
         if upper_limit is not None:
-            fig.add_vline(x=upper_limit, line_dash="dash", line_color="red", annotation_text="USL", annotation_position="top right", row=row, col=col)
+            fig.add_vline(x=upper_limit, line_dash="dash", line_color="red", annotation_text="USL", annotation_position="top", row=row, col=col, annotation_yshift=10)
         if target_value is not None:
-            fig.add_vline(x=target_value, line_dash="dash", line_color="green", annotation_text="T", annotation_position="top left", row=row, col=col)
+            fig.add_vline(x=target_value, line_dash="dash", line_color="green", annotation_text="T", annotation_position="top", row=row, col=col, annotation_yshift=10)
         return fig
 
 @register_plot
