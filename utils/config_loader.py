@@ -53,7 +53,7 @@ class ConfigLoader:
         """
         # Validate keys under 'input'
         for key in ["group_col", "value_col", "lower_limit_col", "upper_limit_col"]:
-            if key not in self._config.input:
+            if key not in self._config.input or self._config.input[key] is None:
                 raise KeyError(f"Missing key in input section: {key}")
 
         # Validate top-level keys

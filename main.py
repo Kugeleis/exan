@@ -52,6 +52,9 @@ def process_columns(df: pd.DataFrame, config: Config, all_limits: Dict[str, Dict
         apply_relevance: bool = any(cast(AnalysisConfig, analysis_cfg)["relevance"] for analysis_cfg in config["analyses"])
         relevance_threshold: float = next((cast(AnalysisConfig, analysis_cfg)["relevance_threshold"] for analysis_cfg in config["analyses"] if "relevance_threshold" in analysis_cfg), 0.2)
 
+        # Initialize result with default None values to prevent UnboundLocalError
+        result: AnalysisResult = {'p_value': None, 'test': None, 'F_statistic': None, 'statistic': None}
+
         for analysis_cls in analyses_to_run:
             analyzer = analysis_cls()
             func = analyzer.analyze
@@ -65,16 +68,27 @@ def process_columns(df: pd.DataFrame, config: Config, all_limits: Dict[str, Dict
             results.append(result)
             logging.info(f"{analysis_cls.__name__} for {value_col}: {result}")
 
+        # Retrieve statistical values for subplot titles
+        p_value = result.get('p_value')
+        test_name = result.get('test')
+        statistic_value = None
+        if test_name == 'ANOVA':
+            statistic_value = result.get('F_statistic')
+        else:
+            statistic_value = result.get('statistic')
+
         # Create a subplot figure with 1 row and 2 columns
-        fig: go.Figure = make_subplots(rows=1, cols=2, subplot_titles=("Box Plot", "Cumulative Frequency"))
+        box_plot_title = f"Box Plot (P={p_value:.3f}, Stat={statistic_value:.3f})" if p_value is not None and statistic_value is not None else "Box Plot"
+        cumulative_frequency_title = f"Cumulative Frequency (P={p_value:.3f}, Stat={statistic_value:.3f})" if p_value is not None and statistic_value is not None else "Cumulative Frequency"
+        fig: go.Figure = make_subplots(rows=1, cols=2, subplot_titles=(box_plot_title, cumulative_frequency_title))
 
         # Add box plot to the first column
         plotter = loader.get_plot_instance("BoxPlot")
-        plotter.plot(df, group_col, value_col, limits=limits, fig=fig, row=1, col=1, style_settings=style_settings)
+        plotter.plot(df, group_col, value_col, limits=limits, fig=fig, row=1, col=1, style_settings=style_settings, results=results)
 
         # Add cumulative frequency plot to the second column
         plotter = loader.get_plot_instance("CumulativeFrequencyPlot")
-        plotter.plot(df, group_col, value_col, limits=limits, fig=fig, row=1, col=2, style_settings=style_settings)
+        plotter.plot(df, group_col, value_col, limits=limits, fig=fig, row=1, col=2, style_settings=style_settings, results=results)
 
         fig.update_layout(title_text=f"Plots for {value_col}")
         plots[value_col] = fig

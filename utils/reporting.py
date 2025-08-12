@@ -56,12 +56,37 @@ class ReportGenerator(ABC):
         if not self.results:
             return ""
 
-        html = "<h2>Analysis Overview</h2>"
-        html += "<table border='1'><tr><th>Column</th><th>Test</th><th>P-Value</th><th>Significant</th><th>Relevance</th><th>Message</th></tr>"
+        html_lines = []
+        html_lines.append("<h2>Analysis Overview</h2>")
+        html_lines.append("<table border='1'>")
+        html_lines.append("<tr><th>Column</th><th>Test</th><th>P-Value</th><th>Significant</th><th>Relevance</th><th>Message</th></tr>")
+
         for result in self.results:
-            html += f"<tr><td>{result.get('column', 'N/A')}</td><td>{result.get('test', 'N/A')}</td><td>{result.get('p_value', 'N/A'):.4f}</td><td>{result.get('significant', 'N/A')}</td><td>{result.get('relevance', 'N/A')}</td><td>{result.get('message', 'N/A')}</td></tr>"
-        html += "</table>"
-        return html
+            column_name = result.get('column', 'N/A')
+            plot_link_html = column_name # Default to just the column name
+
+            # Find the plot name that contains the column_name
+            # This assumes that the plot name contains the column_name
+            # and that the plot_id generation logic is consistent
+            for plot_name in self.plots.keys():
+                if column_name in plot_name:
+                    # Generate the plot_id as done in generate() method
+                    plot_id = plot_name.replace(' ', '_').replace('(', '').replace(')', '').replace('=', '').replace('.', '').replace(',', '')
+                    plot_link_html = f"<a href=\"#{plot_id}\">{column_name}</a>"
+                    break # Found a link, break from inner loop
+
+            html_lines.append(
+                f"<tr>"
+                f"<td>{plot_link_html}</td>"
+                f"<td>{result.get('test', 'N/A')}</td>"
+                f"<td>{result.get('p_value', 'N/A'):.4f}</td>"
+                f"<td>{result.get('significant', 'N/A')}</td>"
+                f"<td>{result.get('relevance', 'N/A')}</td>"
+                f"<td>{result.get('message', 'N/A')}</td>"
+                f"</tr>"
+            )
+        html_lines.append("</table>")
+        return "".join(html_lines)
 
     def _generate_overview_table_pdf(self, pdf: FPDF):
         """
@@ -111,7 +136,7 @@ class InteractiveHTMLReportGenerator(ReportGenerator):
         """
         filename = self.output_dir / f"{self.prefix}.html"
         with open(filename, 'w') as f:
-            f.write("<html><head><title>Analysis Report</title></head><body>")
+            f.write("<html><head><title>Analysis Report</title></head><body><a name=\"top\"></a>")
             f.write("<h1>Analysis Report</h1>")
             f.write("<h2>Report Information</h2>")
             f.write("<ul>")
@@ -120,8 +145,10 @@ class InteractiveHTMLReportGenerator(ReportGenerator):
             f.write("</ul>")
             f.write(self._generate_overview_table_html())
             for name, fig in self.plots.items():
-                f.write(f"<h2>{name}</h2>")
+                plot_id = name.replace(' ', '_').replace('(', '').replace(')', '').replace('=', '').replace('.', '').replace(',', '') # Create a valid ID
+                f.write(f"<h2 id=\"{plot_id}\">{name}</h2>")
                 f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
+                f.write("<p><a href=\"#top\">Back to Top</a></p>")
             f.write("</body></html>")
 
 
@@ -135,7 +162,7 @@ class StaticHTMLReportGenerator(ReportGenerator):
         """
         filename = self.output_dir / f"{self.prefix}_static.html"
         with open(filename, 'w') as f:
-            f.write("<html><head><title>Static Analysis Report</title></head><body>")
+            f.write("<html><head><title>Static Analysis Report</title></head><body><a name=\"top\"></a>")
             f.write("<h1>Static Analysis Report</h1>")
             f.write("<h2>Report Information</h2>")
             f.write("<ul>")
@@ -144,8 +171,10 @@ class StaticHTMLReportGenerator(ReportGenerator):
             f.write("</ul>")
             f.write(self._generate_overview_table_html())
             for name, fig in self.plots.items():
-                f.write(f"<h2>{name}</h2>")
+                plot_id = name.replace(' ', '_').replace('(', '').replace(')', '').replace('=', '').replace('.', '').replace(',', '') # Create a valid ID
+                f.write(f"<h2 id=\"{plot_id}\">{name}</h2>")
                 f.write(fig.to_html(full_html=False, include_plotlyjs=False))
+                f.write("<p><a href=\"#top\">Back to Top</a></p>")
             f.write("</body></html>")
 
 

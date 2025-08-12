@@ -62,7 +62,7 @@ def test_interactive_html_report_generator(mock_file_open, mock_mkdir, mock_plot
     filename = Path("test_report_output/my_test_report.html")
     mock_file_open.assert_called_once_with(filename, "w")
     handle = mock_file_open()
-    handle.write.assert_any_call("<html><head><title>Analysis Report</title></head><body>")
+    handle.write.assert_any_call("<html><head><title>Analysis Report</title></head><body><a name=\"top\"></a>")
     handle.write.assert_any_call("<h1>Analysis Report</h1>")
 
 @patch("pathlib.Path.mkdir")
@@ -75,7 +75,7 @@ def test_static_html_report_generator(mock_file_open, mock_mkdir, mock_plots, mo
     filename = Path("test_report_output/my_test_report_static.html")
     mock_file_open.assert_called_once_with(filename, "w")
     handle = mock_file_open()
-    handle.write.assert_any_call("<html><head><title>Static Analysis Report</title></head><body>")
+    handle.write.assert_any_call("<html><head><title>Static Analysis Report</title></head><body><a name=\"top\"></a>")
     handle.write.assert_any_call("<h1>Static Analysis Report</h1>")
 
 

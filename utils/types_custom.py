@@ -74,12 +74,16 @@ class StyleConfig(TypedDict, total=False):
     limits: LimitsStyles # Renamed from limits_style
     axis: AxisStyle
 
-class Config(TypedDict):
-    report: ReportConfig
+class InputConfig(TypedDict):
+    data_file: str
     group_col: str
     value_col: str
     lower_limit_col: str
     upper_limit_col: str
+
+class Config(TypedDict):
+    report: ReportConfig
+    input: InputConfig
     preprocessing: PreprocessingConfig
     analyses: List[AnalysisConfig]
     plots: List[PlotConfig]

@@ -181,6 +181,7 @@ class BoxPlot(Plot):
 
         self._add_all_limit_lines(fig, limits, True, style_settings=style_settings, row=row, col=col)
         self._apply_axis_style(fig, style_settings.axis, row=row, col=col, yaxis_name="yaxis")
+
         return fig
 
 @register_plot
@@ -220,6 +221,7 @@ class CumulativeFrequencyPlot(Plot):
 
         self._add_all_limit_lines(fig, limits, False, style_settings=style_settings, row=row, col=col)
         self._apply_axis_style(fig, style_settings.axis, row=row, col=col, xaxis_name="xaxis")
+
         return fig
 
 @register_plot
