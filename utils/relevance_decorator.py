@@ -29,9 +29,9 @@ def relevance_decorator(
                     if not result.get("significant", False):
                         result["message"] = "No statistically significant difference."
                     elif relevance:
-                        result["message"] = f"Significant AND relevant (Δ={max_diff:.2f}, threshold={threshold*100:.1f}%)."
+                        result["message"] = f"Significant AND relevant (Diff={max_diff:.2f}, threshold={threshold*100:.1f}%)."
                     else:
-                        result["message"] = f"Significant but NOT relevant (Δ={max_diff:.2f} < {threshold*100:.1f}%)."
+                        result["message"] = f"Significant but NOT relevant (Diff={max_diff:.2f} < {threshold*100:.1f}%)."
             return result
         return wrapper
     return decorator
