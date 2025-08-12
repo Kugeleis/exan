@@ -4,7 +4,7 @@ from fpdf import FPDF
 import tempfile
 import os
 from abc import ABC, abstractmethod
-from typing import List, Dict
+from typing import List, Dict, cast
 from .types_custom import Config, AnalysisResult
 
 class ReportGenerator(ABC):
@@ -44,7 +44,7 @@ class ReportGenerator(ABC):
 
         # Sort the plots based on the p-value of the corresponding column
         # The plot name is expected to be in the format "{plot_type}_{column_name}"
-        self.plots = dict(sorted(self.plots.items(), key=lambda item: p_values.get(item[0].split('_')[-1], float('inf'))))
+        self.plots = dict(sorted(self.plots.items(), key=lambda item: p_values.get(cast(str, item[0].split('_')[-1]), float('inf'))))
 
     def _generate_overview_table_html(self) -> str:
         """
