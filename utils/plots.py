@@ -85,9 +85,9 @@ class CumulativeFrequencyPlot(Plot):
 class SignificancePlot(Plot):
     """Bar chart of p-values for each column."""
     def plot(self,
-             _df: pd.DataFrame, # Unused, but required by ABC
-             _group_col: str, # Unused, but required by ABC
-             _value_col: str, # Unused, but required by ABC
+             df: pd.DataFrame, # Now matches ABC
+             group_col: str, # Now matches ABC
+             value_col: str, # Now matches ABC
              lower_limit: Optional[float] = None,
              upper_limit: Optional[float] = None,
              target_value: Optional[float] = None,
