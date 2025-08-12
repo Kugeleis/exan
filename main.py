@@ -8,10 +8,11 @@ from utils.preprocessing import load_data_with_limits
 from typing import List, Dict
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+from utils.types_custom import Config, AnalysisConfig, PlotConfig
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-def process_columns(df: pd.DataFrame, config: Dict, limits: Dict) -> (Dict, List[Dict]):
+def process_columns(df: pd.DataFrame, config: Config, limits: Dict) -> (Dict, List[Dict]):
     """
     Process each value column in the DataFrame, performing analyses and generating plots.
 
@@ -20,7 +21,7 @@ def process_columns(df: pd.DataFrame, config: Dict, limits: Dict) -> (Dict, List
     :param limits: A dictionary of limits.
     :return: A tuple containing a dictionary of generated plots and a list of analysis results.
     """
-    group_col = config.group_col
+    group_col = config["group_col"]
     value_cols = [col for col in df.columns if col != group_col]
     plots = {}
     results = []
@@ -38,8 +39,8 @@ def process_columns(df: pd.DataFrame, config: Dict, limits: Dict) -> (Dict, List
         elif num_groups > 2:
             analyses_to_run = [AnovaAnalysis]
 
-        apply_relevance = any(analysis_cfg.get("relevance", False) for analysis_cfg in config.analyses)
-        relevance_threshold = next((analysis_cfg.get("relevance_threshold", 0.2) for analysis_cfg in config.analyses if "relevance_threshold" in analysis_cfg), 0.2)
+        apply_relevance = any(analysis_cfg.get("relevance", False) for analysis_cfg in config["analyses"])
+        relevance_threshold = next((analysis_cfg.get("relevance_threshold", 0.2) for analysis_cfg in config["analyses"] if "relevance_threshold" in analysis_cfg), 0.2)
 
         for analysis_cls in analyses_to_run:
             analyzer = analysis_cls()
@@ -71,7 +72,7 @@ def process_columns(df: pd.DataFrame, config: Dict, limits: Dict) -> (Dict, List
 
     return plots, results
 
-def generate_reports(plots: Dict, results: List[Dict], config: Dict) -> None:
+def generate_reports(plots: Dict, results: List[Dict], config: Config) -> None:
     """
     Generate reports based on the provided plots and configuration.
 
@@ -79,7 +80,7 @@ def generate_reports(plots: Dict, results: List[Dict], config: Dict) -> None:
     :param results: A list of analysis results.
     :param config: The configuration dictionary.
     """
-    output_config = config.get("output", {})
+    output_config = config["output"]
     if (
         output_config.get("save_interactive_html")
         or output_config.get("save_static_html")
@@ -92,14 +93,14 @@ def main() -> None:
     Main function to run the data analysis and reporting.
     """
     loader = ConfigLoader("config.yaml")
-    config = loader.settings
+    config: Config = loader.settings
 
     df, limits = load_data_with_limits("data/fake.csv")
 
     plots, results = process_columns(df, config, limits)
 
     # Generate significance plot
-    if any(plot.name == "SignificancePlot" for plot in config.plots):
+    if any(plot.get("name") == "SignificancePlot" for plot in config["plots"]):
         plotter = loader.get_plot_instance("SignificancePlot")
         fig = plotter.plot(df=None, group_col=None, value_col=None, results=results)
         plots["Significance Plot"] = fig
