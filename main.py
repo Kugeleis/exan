@@ -8,7 +8,7 @@ from utils.preprocessing import load_data_with_limits
 from typing import List, Dict, Tuple
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-from utils.types_custom import Config, AnalysisConfig, PlotConfig, AnalysisResult
+from utils.types_custom import Config, AnalysisConfig, PlotConfig, AnalysisResult, OutputConfig
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -80,7 +80,7 @@ def generate_reports(plots: dict[str, go.Figure], results: list[AnalysisResult],
     :param results: A list of analysis results.
     :param config: The configuration dictionary.
     """
-    output_config: dict = config["output"]
+    output_config: OutputConfig = config["output"]
     if (
         output_config.get("save_interactive_html")
         or output_config.get("save_static_html")
