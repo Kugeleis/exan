@@ -7,7 +7,6 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from .plot_registry import register_plot
-from plotly.subplots import make_subplots
 from typing import List, Dict, Optional
 from abc import ABC, abstractmethod
 from box import Box # Import Box for style_settings
@@ -83,7 +82,7 @@ class Plot(ABC):
         col: Optional[int] = None,
         style_settings: Optional[Box] = None, # Added style_settings
     ):
-        if style_settings is None or "limits_style" not in style_settings:
+        if style_settings is None or "limits" not in style_settings:
             # Fallback to hardcoded values if style_settings is not provided or incomplete
             limit_styles = {
                 "LSL": {"annotation_text": "LSL", "line_color": "red", "annotation_position_horizontal": "right", "annotation_xshift_horizontal": 10, "annotation_position_vertical": "top", "annotation_yshift_vertical": 10},
@@ -91,7 +90,7 @@ class Plot(ABC):
                 "T": {"annotation_text": "T", "line_color": "green", "annotation_position_horizontal": "right", "annotation_xshift_horizontal": 10, "annotation_position_vertical": "top", "annotation_yshift_vertical": 10},
             }
         else:
-            limit_styles = style_settings.limits_style
+            limit_styles = style_settings.limits
 
         limits_to_add = [
             (lower_limit, "LSL"),
