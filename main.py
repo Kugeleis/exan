@@ -9,16 +9,18 @@ from typing import Tuple, cast, Dict
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 from utils.types_custom import Config, AnalysisConfig, PlotConfig, AnalysisResult, OutputConfig
+from box import Box # Import Box for style_settings
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-def process_columns(df: pd.DataFrame, config: Config, limits: Dict[str, Dict[str, float]]) -> Tuple[dict[str, go.Figure], list[AnalysisResult]]:
+def process_columns(df: pd.DataFrame, config: Config, limits: Dict[str, Dict[str, float]], style_settings: Box) -> Tuple[dict[str, go.Figure], list[AnalysisResult]]:
     """
     Process each value column in the DataFrame, performing analyses and generating plots.
 
     :param df: The input DataFrame.
     :param config: The configuration dictionary.
     :param limits: A dictionary of limits.
+    :param style_settings: The style configuration for plots.
     :return: A tuple containing a dictionary of generated plots and a list of analysis results.
     """
     group_col: str = config["group_col"]
@@ -63,11 +65,11 @@ def process_columns(df: pd.DataFrame, config: Config, limits: Dict[str, Dict[str
 
         # Add box plot to the first column
         plotter = ConfigLoader("config.yaml").get_plot_instance("BoxPlot")
-        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, target_value, fig=fig, row=1, col=1)
+        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, target_value, fig=fig, row=1, col=1, style_settings=style_settings)
 
         # Add cumulative frequency plot to the second column
         plotter = ConfigLoader("config.yaml").get_plot_instance("CumulativeFrequencyPlot")
-        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, target_value, fig=fig, row=1, col=2)
+        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, target_value, fig=fig, row=1, col=2, style_settings=style_settings)
 
         fig.update_layout(title_text=f"Plots for {value_col}")
         plots[value_col] = fig
@@ -96,18 +98,19 @@ def main() -> None:
     """
     loader = ConfigLoader("config.yaml")
     config: Config = loader.settings
+    style_settings: Box = loader.style_settings # Get style settings
 
     df, limits = load_data_with_limits("data/fake.csv")
 
     plots: dict[str, go.Figure]
     results: list[AnalysisResult]
-    plots, results = process_columns(df, config, limits)
+    plots, results = process_columns(df, config, limits, style_settings)
 
     # Generate significance plot
     if any(cast(PlotConfig, plot_cfg)["name"] == "SignificancePlot" for plot_cfg in config["plots"]):
         plotter = loader.get_plot_instance("SignificancePlot")
         # Pass df, group_col, value_col as required by ABC, even if unused by SignificancePlot
-        fig: go.Figure = plotter.plot(df=df, group_col=config["group_col"], value_col=config["value_col"], results=results)
+        fig: go.Figure = plotter.plot(df=df, group_col=config["group_col"], value_col=config["value_col"], results=results, style_settings=style_settings)
         plots["Significance Plot"] = fig
 
     generate_reports(plots, results, config)
