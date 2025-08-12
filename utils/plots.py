@@ -42,6 +42,11 @@ class Plot(ABC):
         annotation_xshift: Optional[int] = None,
         annotation_yshift: Optional[int] = None,
     ):
+        if fig is not None and (row is None or col is None):
+            # This should ideally not happen if main.py always passes row/col when fig is not None
+            # But adding this check for robustness and to satisfy type checkers
+            raise ValueError("row and col must be provided when fig is not None for subplots.")
+
         if is_horizontal:
             fig.add_hline(
                 y=value,
