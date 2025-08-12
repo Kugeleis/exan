@@ -5,14 +5,14 @@ from utils.relevance_decorator import relevance_decorator
 from utils.analyses import AnovaAnalysis, TTestAnalysis, MannWhitneyAnalysis
 from utils.reporting import generate_report
 from utils.preprocessing import load_data_with_limits
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-from utils.types_custom import Config, AnalysisConfig, PlotConfig
+from utils.types_custom import Config, AnalysisConfig, PlotConfig, AnalysisResult
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-def process_columns(df: pd.DataFrame, config: Config, limits: Dict) -> (Dict, List[Dict]):
+def process_columns(df: pd.DataFrame, config: Config, limits: dict[str, float]) -> Tuple[dict[str, go.Figure], list[AnalysisResult]]:
     """
     Process each value column in the DataFrame, performing analyses and generating plots.
 
@@ -21,26 +21,26 @@ def process_columns(df: pd.DataFrame, config: Config, limits: Dict) -> (Dict, Li
     :param limits: A dictionary of limits.
     :return: A tuple containing a dictionary of generated plots and a list of analysis results.
     """
-    group_col = config["group_col"]
-    value_cols = [col for col in df.columns if col != group_col]
-    plots = {}
-    results = []
+    group_col: str = config["group_col"]
+    value_cols: list[str] = [col for col in df.columns if col != group_col]
+    plots: dict[str, go.Figure] = {}
+    results: list[AnalysisResult] = []
 
     for value_col in value_cols:
         logging.info(f"Processing column: {value_col}")
 
-        lower_limit = limits.get(f"{value_col}_Lower_Limit")
-        upper_limit = limits.get(f"{value_col}_Upper_Limit")
+        lower_limit: float | None = limits.get(f"{value_col}_Lower_Limit")
+        upper_limit: float | None = limits.get(f"{value_col}_Upper_Limit")
 
-        num_groups = df[group_col].nunique()
-        analyses_to_run = []
+        num_groups: int = df[group_col].nunique()
+        analyses_to_run: list = []
         if num_groups == 2:
             analyses_to_run = [TTestAnalysis, MannWhitneyAnalysis]
         elif num_groups > 2:
             analyses_to_run = [AnovaAnalysis]
 
-        apply_relevance = any(analysis_cfg.get("relevance", False) for analysis_cfg in config["analyses"])
-        relevance_threshold = next((analysis_cfg.get("relevance_threshold", 0.2) for analysis_cfg in config["analyses"] if "relevance_threshold" in analysis_cfg), 0.2)
+        apply_relevance: bool = any(analysis_cfg["relevance"] for analysis_cfg in config["analyses"])
+        relevance_threshold: float = next((analysis_cfg["relevance_threshold"] for analysis_cfg in config["analyses"] if "relevance_threshold" in analysis_cfg), 0.2)
 
         for analysis_cls in analyses_to_run:
             analyzer = analysis_cls()
@@ -51,13 +51,13 @@ def process_columns(df: pd.DataFrame, config: Config, limits: Dict) -> (Dict, Li
                     upper_limit,
                     relevance_threshold,
                 )(func)
-            result = func(df, group_col, value_col)
+            result: AnalysisResult = func(df, group_col, value_col)
             result['column'] = value_col
             results.append(result)
             logging.info(f"{analysis_cls.__name__} for {value_col}: {result}")
 
         # Create a subplot figure with 1 row and 2 columns
-        fig = make_subplots(rows=1, cols=2, subplot_titles=("Box Plot", "Cumulative Frequency"))
+        fig: go.Figure = make_subplots(rows=1, cols=2, subplot_titles=("Box Plot", "Cumulative Frequency"))
 
         # Add box plot to the first column
         plotter = ConfigLoader("config.yaml").get_plot_instance("BoxPlot")
@@ -72,7 +72,7 @@ def process_columns(df: pd.DataFrame, config: Config, limits: Dict) -> (Dict, Li
 
     return plots, results
 
-def generate_reports(plots: Dict, results: List[Dict], config: Config) -> None:
+def generate_reports(plots: dict[str, go.Figure], results: list[AnalysisResult], config: Config) -> None:
     """
     Generate reports based on the provided plots and configuration.
 
@@ -80,7 +80,7 @@ def generate_reports(plots: Dict, results: List[Dict], config: Config) -> None:
     :param results: A list of analysis results.
     :param config: The configuration dictionary.
     """
-    output_config = config["output"]
+    output_config: dict = config["output"]
     if (
         output_config.get("save_interactive_html")
         or output_config.get("save_static_html")
@@ -97,12 +97,14 @@ def main() -> None:
 
     df, limits = load_data_with_limits("data/fake.csv")
 
+    plots: dict[str, go.Figure]
+    results: list[AnalysisResult]
     plots, results = process_columns(df, config, limits)
 
     # Generate significance plot
-    if any(plot.get("name") == "SignificancePlot" for plot in config["plots"]):
+    if any(plot_cfg["name"] == "SignificancePlot" for plot_cfg in config["plots"]):
         plotter = loader.get_plot_instance("SignificancePlot")
-        fig = plotter.plot(df=None, group_col=None, value_col=None, results=results)
+        fig: go.Figure = plotter.plot(results=results)
         plots["Significance Plot"] = fig
 
     generate_reports(plots, results, config)

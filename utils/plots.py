@@ -8,21 +8,21 @@ import plotly.express as px
 import plotly.graph_objects as go
 from .plot_registry import register_plot
 from plotly.subplots import make_subplots
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 class Plot:
     """Base class for all plot types."""
     def plot(
         self,
-        df: pd.DataFrame,
-        group_col: str,
-        value_col: str,
-        lower_limit: float | None = None,
-        upper_limit: float | None = None,
-        fig: go.Figure | None = None,
-        row: int | None = None,
-        col: int | None = None,
-        results: List[Dict] | None = None,
+        df: Optional[pd.DataFrame] = None,
+        group_col: Optional[str] = None,
+        value_col: Optional[str] = None,
+        lower_limit: Optional[float] = None,
+        upper_limit: Optional[float] = None,
+        fig: Optional[go.Figure] = None,
+        row: Optional[int] = None,
+        col: Optional[int] = None,
+        results: Optional[List[Dict]] = None,
     ) -> go.Figure:
         raise NotImplementedError
 
@@ -30,12 +30,12 @@ class Plot:
 class BoxPlot(Plot):
     """Interactive box plot of all groups."""
     def plot(self, df: pd.DataFrame, group_col: str, value_col: str,
-             lower_limit: float | None = None,
-             upper_limit: float | None = None,
-             fig: go.Figure | None = None,
-             row: int | None = None,
-             col: int | None = None,
-             results: List[Dict] | None = None) -> go.Figure:
+             lower_limit: Optional[float] = None,
+             upper_limit: Optional[float] = None,
+             fig: Optional[go.Figure] = None,
+             row: Optional[int] = None,
+             col: Optional[int] = None,
+             results: Optional[List[Dict]] = None) -> go.Figure:
         if fig is None:
             fig = go.Figure()
 
@@ -52,12 +52,12 @@ class BoxPlot(Plot):
 class CumulativeFrequencyPlot(Plot):
     """Cumulative frequency plot for each group."""
     def plot(self, df: pd.DataFrame, group_col: str, value_col: str,
-             lower_limit: float | None = None,
-             upper_limit: float | None = None,
-             fig: go.Figure | None = None,
-             row: int | None = None,
-             col: int | None = None,
-             results: List[Dict] | None = None) -> go.Figure:
+             lower_limit: Optional[float] = None,
+             upper_limit: Optional[float] = None,
+             fig: Optional[go.Figure] = None,
+             row: Optional[int] = None,
+             col: Optional[int] = None,
+             results: Optional[List[Dict]] = None) -> go.Figure:
         if fig is None:
             fig = go.Figure()
 
@@ -75,13 +75,11 @@ class CumulativeFrequencyPlot(Plot):
 @register_plot
 class SignificancePlot(Plot):
     """Bar chart of p-values for each column."""
-    def plot(self, df: pd.DataFrame, group_col: str, value_col: str,
-             lower_limit: float | None = None,
-             upper_limit: float | None = None,
-             fig: go.Figure | None = None,
-             row: int | None = None,
-             col: int | None = None,
-             results: List[Dict] | None = None) -> go.Figure:
+    def plot(self,
+             fig: Optional[go.Figure] = None,
+             row: Optional[int] = None,
+             col: Optional[int] = None,
+             results: Optional[List[Dict]] = None) -> go.Figure:
         if results is None:
             return go.Figure()
 
