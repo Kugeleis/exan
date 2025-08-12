@@ -5,7 +5,7 @@ from utils.relevance_decorator import relevance_decorator
 from utils.analyses import AnovaAnalysis, TTestAnalysis, MannWhitneyAnalysis
 from utils.reporting import generate_report
 from utils.preprocessing import load_data_with_limits
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, cast
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 from utils.types_custom import Config, AnalysisConfig, PlotConfig, AnalysisResult, OutputConfig
@@ -39,8 +39,8 @@ def process_columns(df: pd.DataFrame, config: Config, limits: dict[str, float]) 
         elif num_groups > 2:
             analyses_to_run = [AnovaAnalysis]
 
-        apply_relevance: bool = any(analysis_cfg["relevance"] for analysis_cfg in config["analyses"])
-        relevance_threshold: float = next((analysis_cfg["relevance_threshold"] for analysis_cfg in config["analyses"] if "relevance_threshold" in analysis_cfg), 0.2)
+        apply_relevance: bool = any(cast(AnalysisConfig, analysis_cfg)["relevance"] for analysis_cfg in config["analyses"])
+        relevance_threshold: float = next((cast(AnalysisConfig, analysis_cfg)["relevance_threshold"] for analysis_cfg in config["analyses"] if "relevance_threshold" in analysis_cfg), 0.2)
 
         for analysis_cls in analyses_to_run:
             analyzer = analysis_cls()
@@ -102,7 +102,7 @@ def main() -> None:
     plots, results = process_columns(df, config, limits)
 
     # Generate significance plot
-    if any(plot_cfg["name"] == "SignificancePlot" for plot_cfg in config["plots"]):
+    if any(cast(PlotConfig, plot_cfg)["name"] == "SignificancePlot" for plot_cfg in config["plots"]):
         plotter = loader.get_plot_instance("SignificancePlot")
         fig: go.Figure = plotter.plot(results=results)
         plots["Significance Plot"] = fig
