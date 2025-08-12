@@ -5,17 +5,18 @@ import tempfile
 import os
 from abc import ABC, abstractmethod
 from typing import List, Dict
+from .types_custom import Config
 
 class ReportGenerator(ABC):
-    def __init__(self, plots: dict[str, go.Figure], results: List[Dict], config: dict):
+    def __init__(self, plots: dict[str, go.Figure], results: List[Dict], config: Config):
         self.plots = plots
         self.results = results
         self.config = config
-        self.output_config = self.config.output
-        self.report_config = self.config.report
-        self.output_dir = Path(self.output_config.output_directory)
+        self.output_config = self.config["output"]
+        self.report_config = self.config["report"]
+        self.output_dir = Path(self.output_config["output_directory"])
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.prefix = self.report_config.name
+        self.prefix = self.report_config["name"]
         self._sort_plots_by_significance()
 
     def _sort_plots_by_significance(self):
@@ -138,7 +139,7 @@ class PDFReportGenerator(ReportGenerator):
         pdf.output(str(pdf_filename))
 
 
-def report_generator_factory(format: str, plots: dict[str, go.Figure], results: List[Dict], config: dict) -> ReportGenerator:
+def report_generator_factory(format: str, plots: dict[str, go.Figure], results: List[Dict], config: Config) -> ReportGenerator:
     if format == "interactive_html":
         return InteractiveHTMLReportGenerator(plots, results, config)
     elif format == "static_html":
@@ -148,18 +149,18 @@ def report_generator_factory(format: str, plots: dict[str, go.Figure], results: 
     else:
         raise ValueError(f"Unknown report format: {format}")
 
-def generate_report(plots: dict[str, go.Figure], results: List[Dict], config: dict):
+def generate_report(plots: dict[str, go.Figure], results: List[Dict], config: Config):
     """
     Generates a report containing multiple plots in various formats.
     """
-    output_config = config.output
+    output_config = config["output"]
 
     report_formats = []
-    if output_config.save_interactive_html:
+    if output_config["save_interactive_html"]:
         report_formats.append("interactive_html")
-    if output_config.save_static_html:
+    if output_config["save_static_html"]:
         report_formats.append("static_html")
-    if output_config.save_pdf:
+    if output_config["save_pdf"]:
         report_formats.append("pdf")
 
     for format in report_formats:
