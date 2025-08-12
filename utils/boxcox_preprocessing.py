@@ -1,6 +1,9 @@
 """
 boxcox_preprocessing.py
-Module providing iterative Box-Cox transformation utilities for data normalization.
+
+This module provides utilities for applying Box-Cox transformation to data.
+It supports both global and group-wise transformations, handling non-positive values
+by applying an offset.
 """
 
 import numpy as np
@@ -16,10 +19,17 @@ def boxcox_transform(
     Transforms data using Box-Cox transformation.
     If lambda is None, finds optimal lambda via maximum likelihood estimation.
 
-    :param data: 1D numeric data (positive values required)
-    :param lmbda: Box-Cox lambda parameter; if None, determine automatically
-    :param offset: Small positive offset added if data contains zeros/negatives
-    :returns: Tuple of (transformed data np.ndarray, used lambda value)
+    Args:
+        data (pd.Series): 1D numeric data (positive values required for direct transformation).
+        lmbda (float | None): Box-Cox lambda parameter. If None, it is determined automatically
+                              using maximum likelihood estimation (`boxcox_normmax`).
+        offset (float): A small positive offset added to data if it contains zeros or negative values
+                        to ensure all values are positive before transformation.
+
+    Returns:
+        tuple[np.ndarray, float]: A tuple containing:
+            - transformed_data (np.ndarray): The Box-Cox transformed data.
+            - used_lambda (float): The lambda value used for the transformation.
     """
     # Shift data if non-positive values exist
     if (data <= 0).any():
@@ -50,12 +60,22 @@ def apply_boxcox_preprocessing(
     """
     Applies Box-Cox transformation on data, either globally or separately per group.
 
-    :param df: DataFrame containing the data
-    :param value_col: Name of the measurement column to transform
-    :param group_col: Name of group column (required if global_transform=False)
-    :param offset: Small positive offset to handle non-positive values
-    :param global_transform: If True, transform the entire data together; else per group
-    :return: Tuple of (transformed DataFrame with updated value_col, dict of lambdas per group or global)
+    Args:
+        df (pd.DataFrame): DataFrame containing the data to be transformed.
+        value_col (str): Name of the measurement column in `df` to transform.
+        group_col (str | None): Name of the grouping column in `df`. Required if `global_transform` is False.
+        offset (float): Small positive offset to handle non-positive values in the data.
+        global_transform (bool): If True, the entire `value_col` is transformed together.
+                                 If False, transformation is applied independently to each group defined by `group_col`.
+
+    Returns:
+        tuple[pd.DataFrame, dict]: A tuple containing:
+            - transformed_df (pd.DataFrame): The DataFrame with the `value_col` updated with transformed values.
+            - lambdas (dict): A dictionary of lambda values used for transformation. If `global_transform` is True,
+                              it contains a single 'global' key. Otherwise, it contains lambda values per group.
+
+    Raises:
+        ValueError: If `group_col` is None when `global_transform` is False.
     """
 
     transformed_df = df.copy()

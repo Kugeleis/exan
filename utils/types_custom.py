@@ -1,3 +1,12 @@
+"""
+types_custom.py
+
+This module defines custom type hints using `TypedDict` for various
+configuration structures and data analysis results. These types enhance
+code readability and enable static type checking for complex dictionary
+structures.
+"""
+
 from typing import TypedDict, List
 
 class AnalysisResult(TypedDict, total=False):

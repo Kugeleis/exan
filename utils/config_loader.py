@@ -7,7 +7,25 @@ from .plot_registry import PLOT_REGISTRY
 from .types_custom import Config
 
 class ConfigLoader:
+    """
+    Loads and manages application configuration from YAML files.
+
+    This class is responsible for loading the main configuration (`config.yaml`)
+    and the style configuration (`style.yaml`). It also performs basic validation
+    and auto-imports analysis and plot modules to register them.
+    """
     def __init__(self, config_file: str = "config.yaml", style_file: str = "style.yaml"):
+        """
+        Initializes the ConfigLoader by loading configuration files.
+
+        Args:
+            config_file (str): The path to the main configuration YAML file.
+            style_file (str): The path to the style configuration YAML file.
+        
+        Raises:
+            FileNotFoundError: If either config_file or style_file does not exist.
+            KeyError: If essential keys are missing from the config_file.
+        """
         self.config_file = Path(config_file)
         self.style_file = Path(style_file)
         # Box.from_yaml will raise an error if the file is not found, making it mandatory
@@ -18,6 +36,12 @@ class ConfigLoader:
         self._autoimport('utils.plots')
 
     def _validate(self):
+        """
+        Performs basic validation of the loaded configuration.
+
+        Raises:
+            KeyError: If essential keys are missing from the main configuration.
+        """
         # This validation is now largely handled by the TypedDict, but basic key presence can remain
         for key in ["group_col","value_col","lower_limit_col","upper_limit_col","analyses","plots","output", "report"]:
             if key not in self._config:
@@ -26,6 +50,12 @@ class ConfigLoader:
             raise KeyError("Missing key: name in report section")
 
     def _autoimport(self, pkg):
+        """
+        Automatically imports modules within a specified package to trigger registration decorators.
+
+        Args:
+            pkg (str): The name of the package to auto-import (e.g., 'utils.analyses').
+        """
         package = importlib.import_module(pkg)
         path = Path(__file__).parent / "utils"
         for _, modname, ispkg in pkgutil.iter_modules([str(path)]):
@@ -33,10 +63,51 @@ class ConfigLoader:
                 importlib.import_module(f".{modname}", __package__)
 
     @property
-    def settings(self) -> Config: return self._config
+    def settings(self) -> Config:
+        """
+        Returns the main application settings.
+
+        Returns:
+            Config: The main configuration object.
+        """
+        return self._config
 
     @property
-    def style_settings(self) -> Box: return self._style_config
+    def style_settings(self) -> Box:
+        """
+        Returns the loaded style settings.
 
-    def get_analysis_instance(self, name): return ANALYSIS_REGISTRY[name]()
-    def get_plot_instance(self, name): return PLOT_REGISTRY[name]()
+        Returns:
+            Box: The style configuration object.
+        """
+        return self._style_config
+
+    def get_analysis_instance(self, name):
+        """
+        Retrieves an instance of a registered analysis class.
+
+        Args:
+            name (str): The name of the analysis class to retrieve.
+
+        Returns:
+            Analysis: An instance of the requested analysis class.
+        
+        Raises:
+            KeyError: If the analysis name is not registered.
+        """
+        return ANALYSIS_REGISTRY[name]()
+
+    def get_plot_instance(self, name):
+        """
+        Retrieves an instance of a registered plot class.
+
+        Args:
+            name (str): The name of the plot class to retrieve.
+
+        Returns:
+            Plot: An instance of the requested plot class.
+        
+        Raises:
+            KeyError: If the plot name is not registered.
+        """
+        return PLOT_REGISTRY[name]()
