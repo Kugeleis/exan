@@ -5,7 +5,7 @@ from utils.relevance_decorator import relevance_decorator
 from utils.analyses import AnovaAnalysis, TTestAnalysis, MannWhitneyAnalysis
 from utils.reporting import generate_report as _generate_report_actual # Renamed to avoid shadowing
 from utils.preprocessing import load_data_with_limits
-from typing import Tuple, cast, Dict
+from typing import Tuple, cast, Dict, Optional
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 from utils.types_custom import Config, AnalysisConfig, PlotConfig, AnalysisResult, OutputConfig
@@ -31,10 +31,12 @@ def process_columns(df: pd.DataFrame, config: Config, limits: Dict[str, Dict[str
     for value_col in value_cols:
         logging.info(f"Processing column: {value_col}")
 
-        # Retrieve column-specific limits
-        lower_limit: float | None = limits.get("Lower_Limit", {}).get(value_col)
-        upper_limit: float | None = limits.get("Upper_Limit", {}).get(value_col)
-        target_value: float | None = limits.get("Target", {}).get(value_col)
+        # Construct limits_dict for the current value_col
+        current_limits_dict: Dict[str, Optional[float]] = {
+            "lower_limit": limits.get("Lower_Limit", {}).get(value_col),
+            "upper_limit": limits.get("Upper_Limit", {}).get(value_col),
+            "target_value": limits.get("Target", {}).get(value_col),
+        }
 
         num_groups: int = df[group_col].nunique()
         analyses_to_run: list = []
@@ -49,10 +51,9 @@ def process_columns(df: pd.DataFrame, config: Config, limits: Dict[str, Dict[str
         for analysis_cls in analyses_to_run:
             analyzer = analysis_cls()
             func = analyzer.analyze
-            if apply_relevance and lower_limit is not None and upper_limit is not None:
+            if apply_relevance and current_limits_dict["lower_limit"] is not None and current_limits_dict["upper_limit"] is not None:
                 func = relevance_decorator(
-                    lower_limit,
-                    upper_limit,
+                    current_limits_dict, # Pass limits_dict
                     relevance_threshold,
                 )(func)
             result: AnalysisResult = func(df, group_col, value_col)
@@ -65,11 +66,11 @@ def process_columns(df: pd.DataFrame, config: Config, limits: Dict[str, Dict[str
 
         # Add box plot to the first column
         plotter = ConfigLoader("config.yaml").get_plot_instance("BoxPlot")
-        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, target_value, fig=fig, row=1, col=1, style_settings=style_settings)
+        plotter.plot(df, group_col, value_col, limits_dict=current_limits_dict, fig=fig, row=1, col=1, style_settings=style_settings)
 
         # Add cumulative frequency plot to the second column
         plotter = ConfigLoader("config.yaml").get_plot_instance("CumulativeFrequencyPlot")
-        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, target_value, fig=fig, row=1, col=2, style_settings=style_settings)
+        plotter.plot(df, group_col, value_col, limits_dict=current_limits_dict, fig=fig, row=1, col=2, style_settings=style_settings)
 
         fig.update_layout(title_text=f"Plots for {value_col}")
         plots[value_col] = fig
@@ -110,7 +111,7 @@ def main() -> None:
     if any(cast(PlotConfig, plot_cfg)["name"] == "SignificancePlot" for plot_cfg in config["plots"]):
         plotter = loader.get_plot_instance("SignificancePlot")
         # Pass df, group_col, value_col as required by ABC, even if unused by SignificancePlot
-        fig: go.Figure = plotter.plot(df=df, group_col=config["group_col"], value_col=config["value_col"], results=results, style_settings=style_settings)
+        fig: go.Figure = plotter.plot(df=df, group_col=config["group_col"], value_col=config["value_col"], limits_dict=current_limits_dict, results=results, style_settings=style_settings)
         plots["Significance Plot"] = fig
 
     generate_reports(plots, results, config)

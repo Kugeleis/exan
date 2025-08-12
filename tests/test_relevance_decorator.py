@@ -15,24 +15,35 @@ def mock_analysis_not_significant(df, group_col, value_col):
     }
 
 def test_relevance_decorator_relevant():
-    decorated_analysis = relevance_decorator(lower_limit=0, upper_limit=50, threshold=0.1)(mock_analysis_significant)
+    limits_dict = {"lower_limit": 0, "upper_limit": 50}
+    decorated_analysis = relevance_decorator(limits_dict, threshold=0.1)(mock_analysis_significant)
     result = decorated_analysis(pd.DataFrame(), "", "")
     assert result["relevance"] is True
     assert "Significant AND relevant" in result["message"]
 
 def test_relevance_decorator_not_relevant():
-    decorated_analysis = relevance_decorator(lower_limit=0, upper_limit=50, threshold=0.5)(mock_analysis_significant)
+    limits_dict = {"lower_limit": 0, "upper_limit": 50}
+    decorated_analysis = relevance_decorator(limits_dict, threshold=0.5)(mock_analysis_significant)
     result = decorated_analysis(pd.DataFrame(), "", "")
     assert result["relevance"] is False
     assert "Significant but NOT relevant" in result["message"]
 
 def test_relevance_decorator_not_significant():
-    decorated_analysis = relevance_decorator(lower_limit=0, upper_limit=50, threshold=0.1)(mock_analysis_not_significant)
+    limits_dict = {"lower_limit": 0, "upper_limit": 50}
+    decorated_analysis = relevance_decorator(limits_dict, threshold=0.1)(mock_analysis_not_significant)
     result = decorated_analysis(pd.DataFrame(), "", "")
     assert "No statistically significant difference" in result["message"]
 
 def test_relevance_decorator_zero_range():
-    decorated_analysis = relevance_decorator(lower_limit=50, upper_limit=50, threshold=0.1)(mock_analysis_significant)
+    limits_dict = {"lower_limit": 50, "upper_limit": 50}
+    decorated_analysis = relevance_decorator(limits_dict, threshold=0.1)(mock_analysis_significant)
     result = decorated_analysis(pd.DataFrame(), "", "")
     assert result["relevance"] is False
     assert "Zero range" in result["message"]
+
+def test_relevance_decorator_missing_limits():
+    limits_dict = {"lower_limit": 0}
+    decorated_analysis = relevance_decorator(limits_dict, threshold=0.1)(mock_analysis_significant)
+    result = decorated_analysis(pd.DataFrame(), "", "")
+    assert result["relevance"] is False
+    assert "Missing lower or upper limit" in result["message"]
