@@ -10,7 +10,13 @@ def mock_config_loader():
     with patch('main.ConfigLoader') as mock:
         instance = mock.return_value
         instance.settings = Box({
-            'group_col': 'Group',
+            'input': {
+                'group_col': 'Group',
+                'value_col': 'Value',
+                'lower_limit_col': 'Lower_Limit',
+                'upper_limit_col': 'Upper_Limit',
+                'data_file': 'data/fake.csv'
+            },
             'analyses': [],
             'plots': [],
             'output': {}
@@ -58,14 +64,18 @@ B,2
         "Lower_Limit": {"Value": 1.0},
         "Upper_Limit": {"Value": 3.0},
     }
-    with patch('main.load_data_with_limits', return_value=(pd.read_csv(csv_path, skiprows=2), mock_limits)):
+    # Mock config.input.data_file
+    mock_config_loader.return_value.settings.input.data_file = csv_path
+
+    with patch('main.load_data_with_limits', return_value=(pd.read_csv(csv_path, skiprows=2), mock_limits)) as mock_load_data:
         with patch.object(TTestAnalysis, 'analyze', return_value={}) as mock_ttest, \
              patch.object(MannWhitneyAnalysis, 'analyze', return_value={}) as mock_mannwhitney, \
              patch.object(AnovaAnalysis, 'analyze', return_value={}) as mock_anova:
-            main.main()
+            main.run_analysis(mock_config_loader.return_value.settings, mock_config_loader.return_value.style_settings, mock_config_loader.return_value)
             assert mock_ttest.called
             assert mock_mannwhitney.called
             assert not mock_anova.called
+            mock_load_data.assert_called_once_with(csv_path)
 
 def test_main_3_groups(mock_config_loader, create_dummy_csv):
     csv_content = """# limit: Lower_Limit, 1.0
@@ -84,14 +94,18 @@ C,2
         "Lower_Limit": {"Value": 1.0},
         "Upper_Limit": {"Value": 3.0},
     }
-    with patch('main.load_data_with_limits', return_value=(pd.read_csv(csv_path, skiprows=2), mock_limits)):
+    # Mock config.input.data_file
+    mock_config_loader.return_value.settings.input.data_file = csv_path
+
+    with patch('main.load_data_with_limits', return_value=(pd.read_csv(csv_path, skiprows=2), mock_limits)) as mock_load_data:
         with patch.object(TTestAnalysis, 'analyze', return_value={}) as mock_ttest, \
              patch.object(MannWhitneyAnalysis, 'analyze', return_value={}) as mock_mannwhitney, \
              patch.object(AnovaAnalysis, 'analyze', return_value={}) as mock_anova:
-            main.main()
+            main.run_analysis(mock_config_loader.return_value.settings, mock_config_loader.return_value.style_settings, mock_config_loader.return_value)
             assert not mock_ttest.called
             assert not mock_mannwhitney.called
             assert mock_anova.called
+            mock_load_data.assert_called_once_with(csv_path)
 
 def test_main_1_group(mock_config_loader, create_dummy_csv):
     csv_content = """# limit: Lower_Limit, 1.0
@@ -106,11 +120,15 @@ A,2
         "Lower_Limit": {"Value": 1.0},
         "Upper_Limit": {"Value": 3.0},
     }
-    with patch('main.load_data_with_limits', return_value=(pd.read_csv(csv_path, skiprows=2), mock_limits)):
+    # Mock config.input.data_file
+    mock_config_loader.return_value.settings.input.data_file = csv_path
+
+    with patch('main.load_data_with_limits', return_value=(pd.read_csv(csv_path, skiprows=2), mock_limits)) as mock_load_data:
         with patch.object(TTestAnalysis, 'analyze', return_value={}) as mock_ttest, \
              patch.object(MannWhitneyAnalysis, 'analyze', return_value={}) as mock_mannwhitney, \
              patch.object(AnovaAnalysis, 'analyze', return_value={}) as mock_anova:
-            main.main()
+            main.run_analysis(mock_config_loader.return_value.settings, mock_config_loader.return_value.style_settings, mock_config_loader.return_value)
             assert not mock_ttest.called
             assert not mock_mannwhitney.called
             assert not mock_anova.called
+            mock_load_data.assert_called_once_with(csv_path)

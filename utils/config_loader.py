@@ -14,22 +14,31 @@ class ConfigLoader:
     and the style configuration (`style.yaml`). It also performs basic validation
     and auto-imports analysis and plot modules to register them.
     """
-    def __init__(self, config_file: str = "config.yaml", style_file: str = "style.yaml"):
+    def __init__(self, config_file: str = "config.yaml", style_file: str = "style.yaml", default_config_file: str = "default_config.yaml"):
         """
         Initializes the ConfigLoader by loading configuration files.
 
         Args:
             config_file (str): The path to the main configuration YAML file.
             style_file (str): The path to the style configuration YAML file.
+            default_config_file (str): The path to the default configuration YAML file.
         
         Raises:
-            FileNotFoundError: If either config_file or style_file does not exist.
-            KeyError: If essential keys are missing from the config_file.
+            FileNotFoundError: If the default_config_file does not exist, or if the style_file does not exist.
+            KeyError: If essential keys are missing from the merged configuration.
         """
+        self.default_config_file: str = default_config_file
         self.config_file = Path(config_file)
         self.style_file = Path(style_file)
-        # Box.from_yaml will raise an error if the file is not found, making it mandatory
-        self._config: Config = Box.from_yaml(filename=self.config_file)
+
+        # Load default config
+        self._config: Config = Box.from_yaml(filename=self.default_config_file)
+
+        # Load user config and merge it into the default config
+        if self.config_file.exists():
+            user_config = Box.from_yaml(filename=self.config_file)
+            self._config.merge_update(user_config)
+
         self._style_config: Box = Box.from_yaml(filename=self.style_file)
         self._validate()
         self._autoimport('utils.analyses')
@@ -42,10 +51,16 @@ class ConfigLoader:
         Raises:
             KeyError: If essential keys are missing from the main configuration.
         """
-        # This validation is now largely handled by the TypedDict, but basic key presence can remain
-        for key in ["group_col","value_col","lower_limit_col","upper_limit_col","analyses","plots","output", "report"]:
+        # Validate keys under 'input'
+        for key in ["group_col", "value_col", "lower_limit_col", "upper_limit_col"]:
+            if key not in self._config.input:
+                raise KeyError(f"Missing key in input section: {key}")
+
+        # Validate top-level keys
+        for key in ["analyses", "plots", "output", "report"]:
             if key not in self._config:
                 raise KeyError(f"Missing key: {key}")
+
         if "name" not in self._config["report"]:
             raise KeyError("Missing key: name in report section")
 

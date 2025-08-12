@@ -13,7 +13,7 @@ from box import Box # Import Box for style_settings
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-def process_columns(df: pd.DataFrame, config: Config, all_limits: Dict[str, Dict[str, float]], style_settings: Box) -> Tuple[dict[str, go.Figure], list[AnalysisResult]]:
+def process_columns(df: pd.DataFrame, config: Config, all_limits: Dict[str, Dict[str, float]], style_settings: Box, loader: ConfigLoader) -> Tuple[dict[str, go.Figure], list[AnalysisResult]]:
     """
     Process each value column in the DataFrame, performing analyses and generating plots.
 
@@ -21,10 +21,14 @@ def process_columns(df: pd.DataFrame, config: Config, all_limits: Dict[str, Dict
     :param config: The configuration dictionary.
     :param all_limits: A dictionary of all limits (per column).
     :param style_settings: The style configuration for plots.
+    :param loader: The config loader instance.
     :return: A tuple containing a dictionary of generated plots and a list of analysis results.
     """
-    group_col: str = config["group_col"]
-    value_cols: list[str] = [col for col in df.columns if col != group_col]
+    group_col: str = config.input.group_col
+    value_cols: list[str] = [
+        col for col in df.select_dtypes(include=['number']).columns
+        if col != group_col
+    ]
     plots: dict[str, go.Figure] = {}
     results: list[AnalysisResult] = []
 
@@ -65,11 +69,11 @@ def process_columns(df: pd.DataFrame, config: Config, all_limits: Dict[str, Dict
         fig: go.Figure = make_subplots(rows=1, cols=2, subplot_titles=("Box Plot", "Cumulative Frequency"))
 
         # Add box plot to the first column
-        plotter = ConfigLoader("config.yaml").get_plot_instance("BoxPlot")
+        plotter = loader.get_plot_instance("BoxPlot")
         plotter.plot(df, group_col, value_col, limits=limits, fig=fig, row=1, col=1, style_settings=style_settings)
 
         # Add cumulative frequency plot to the second column
-        plotter = ConfigLoader("config.yaml").get_plot_instance("CumulativeFrequencyPlot")
+        plotter = loader.get_plot_instance("CumulativeFrequencyPlot")
         plotter.plot(df, group_col, value_col, limits=limits, fig=fig, row=1, col=2, style_settings=style_settings)
 
         fig.update_layout(title_text=f"Plots for {value_col}")
@@ -93,29 +97,22 @@ def generate_reports(plots: dict[str, go.Figure], results: list[AnalysisResult],
     ):
         _generate_report_actual(plots, results, config)
 
-def main() -> None:
+def run_analysis(config: Config, style_settings: Box, loader: ConfigLoader) -> None:
     """
     Main function to run the data analysis and reporting.
     """
-    loader = ConfigLoader("config.yaml")
-    config: Config = loader.settings
-    style_settings: Box = loader.style_settings # Get style settings
-
-    df, all_limits = load_data_with_limits("data/fake.csv") # Renamed limits to all_limits
+    df, all_limits = load_data_with_limits(config.input.data_file)
 
     plots: dict[str, go.Figure]
     results: list[AnalysisResult]
-    plots, results = process_columns(df, config, all_limits, style_settings)
+    plots, results = process_columns(df, config, all_limits, style_settings, loader)
 
     # Generate significance plot
     if any(cast(PlotConfig, plot_cfg)["name"] == "SignificancePlot" for plot_cfg in config["plots"]):
         plotter = loader.get_plot_instance("SignificancePlot")
         # Pass df, group_col, value_col as required by ABC, even if unused by SignificancePlot
         # Pass a dummy limits dict for SignificancePlot as it doesn't use it directly
-        fig: go.Figure = plotter.plot(df=df, group_col=config["group_col"], value_col=config["value_col"], limits={}, results=results, style_settings=style_settings)
+        fig: go.Figure = plotter.plot(df=df, group_col=config.input.group_col, value_col=config.input.value_col, limits={}, results=results, style_settings=style_settings)
         plots["Significance Plot"] = fig
 
     generate_reports(plots, results, config)
-
-if __name__ == "__main__":
-    main()

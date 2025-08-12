@@ -1,12 +1,16 @@
 import shutil
+import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 import logging
-from box import Box
+
+from utils.config_loader import ConfigLoader
+from utils.types_custom import Config
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-config = Box().from_yaml(filename="config.yaml")
 
-def clean_output_directory(config: Box = config):
+
+def clean_output_directory(config: Config):
     """
     Removes all files and subdirectories within the 'output' directory
     without deleting the directory itself.
@@ -30,4 +34,6 @@ def clean_output_directory(config: Box = config):
     logging.info("Cleaning complete.")
 
 if __name__ == "__main__":
-    clean_output_directory()
+    loader = ConfigLoader()
+    config: Config = loader.settings
+    clean_output_directory(config)
