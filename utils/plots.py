@@ -13,11 +13,12 @@ from abc import ABC, abstractmethod
 
 class Plot(ABC):
     """Base class for all plot types."""
+    @abstractmethod
     def plot(
         self,
-        df: Optional[pd.DataFrame] = None,
-        group_col: Optional[str] = None,
-        value_col: Optional[str] = None,
+        df: pd.DataFrame,
+        group_col: str,
+        value_col: str,
         lower_limit: Optional[float] = None,
         upper_limit: Optional[float] = None,
         target_value: Optional[float] = None,
@@ -84,6 +85,12 @@ class CumulativeFrequencyPlot(Plot):
 class SignificancePlot(Plot):
     """Bar chart of p-values for each column."""
     def plot(self,
+             _df: pd.DataFrame, # Unused, but required by ABC
+             _group_col: str, # Unused, but required by ABC
+             _value_col: str, # Unused, but required by ABC
+             lower_limit: Optional[float] = None,
+             upper_limit: Optional[float] = None,
+             target_value: Optional[float] = None,
              fig: Optional[go.Figure] = None,
              row: Optional[int] = None,
              col: Optional[int] = None,

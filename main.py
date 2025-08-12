@@ -106,7 +106,8 @@ def main() -> None:
     # Generate significance plot
     if any(cast(PlotConfig, plot_cfg)["name"] == "SignificancePlot" for plot_cfg in config["plots"]):
         plotter = loader.get_plot_instance("SignificancePlot")
-        fig: go.Figure = plotter.plot(results=results)
+        # Pass df, group_col, value_col as required by ABC, even if unused by SignificancePlot
+        fig: go.Figure = plotter.plot(df=df, group_col=config["group_col"], value_col=config["value_col"], results=results)
         plots["Significance Plot"] = fig
 
     generate_reports(plots, results, config)
