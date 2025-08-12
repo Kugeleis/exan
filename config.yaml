@@ -23,6 +23,7 @@ analyses:
 plots:
   - name: BoxPlot
   - name: CumulativeFrequencyPlot
+  - name: SignificancePlot
     
 
 output:

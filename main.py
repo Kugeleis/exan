@@ -98,6 +98,12 @@ def main() -> None:
 
     plots, results = process_columns(df, config, limits)
 
+    # Generate significance plot
+    if any(plot.name == "SignificancePlot" for plot in config.plots):
+        plotter = loader.get_plot_instance("SignificancePlot")
+        fig = plotter.plot(df=None, group_col=None, value_col=None, results=results)
+        plots["Significance Plot"] = fig
+
     generate_reports(plots, results, config)
 
 if __name__ == "__main__":

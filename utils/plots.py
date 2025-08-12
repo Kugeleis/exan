@@ -8,6 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from .plot_registry import register_plot
 from plotly.subplots import make_subplots
+from typing import List, Dict
 
 class Plot:
     """Base class for all plot types."""
@@ -21,6 +22,7 @@ class Plot:
         fig: go.Figure | None = None,
         row: int | None = None,
         col: int | None = None,
+        results: List[Dict] | None = None,
     ) -> go.Figure:
         raise NotImplementedError
 
@@ -32,7 +34,8 @@ class BoxPlot(Plot):
              upper_limit: float | None = None,
              fig: go.Figure | None = None,
              row: int | None = None,
-             col: int | None = None) -> go.Figure:
+             col: int | None = None,
+             results: List[Dict] | None = None) -> go.Figure:
         if fig is None:
             fig = go.Figure()
 
@@ -53,7 +56,8 @@ class CumulativeFrequencyPlot(Plot):
              upper_limit: float | None = None,
              fig: go.Figure | None = None,
              row: int | None = None,
-             col: int | None = None) -> go.Figure:
+             col: int | None = None,
+             results: List[Dict] | None = None) -> go.Figure:
         if fig is None:
             fig = go.Figure()
 
@@ -66,4 +70,27 @@ class CumulativeFrequencyPlot(Plot):
             fig.add_vline(x=lower_limit, line_dash="dash", line_color="red", row=row, col=col)
         if upper_limit is not None:
             fig.add_vline(x=upper_limit, line_dash="dash", line_color="red", row=row, col=col)
+        return fig
+
+@register_plot
+class SignificancePlot(Plot):
+    """Bar chart of p-values for each column."""
+    def plot(self, df: pd.DataFrame, group_col: str, value_col: str,
+             lower_limit: float | None = None,
+             upper_limit: float | None = None,
+             fig: go.Figure | None = None,
+             row: int | None = None,
+             col: int | None = None,
+             results: List[Dict] | None = None) -> go.Figure:
+        if results is None:
+            return go.Figure()
+
+        if fig is None:
+            fig = go.Figure()
+
+        columns = [result['column'] for result in results]
+        p_values = [result['p_value'] for result in results]
+
+        fig.add_trace(go.Bar(x=columns, y=p_values, name="P-Value"), row=row, col=col)
+        fig.add_hline(y=0.05, line_dash="dash", line_color="red", row=row, col=col)
         return fig
