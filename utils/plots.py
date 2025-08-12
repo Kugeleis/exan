@@ -43,8 +43,6 @@ class Plot(ABC):
         annotation_yshift: Optional[int] = None,
     ):
         if fig is not None and (row is None or col is None):
-            # This should ideally not happen if main.py always passes row/col when fig is not None
-            # But adding this check for robustness and to satisfy type checkers
             raise ValueError("row and col must be provided when fig is not None for subplots.")
 
         if is_horizontal:
@@ -72,6 +70,26 @@ class Plot(ABC):
                 annotation_yshift=annotation_yshift,
             )
 
+    def _add_all_limit_lines(
+        self,
+        fig: go.Figure,
+        lower_limit: Optional[float],
+        upper_limit: Optional[float],
+        target_value: Optional[float],
+        is_horizontal: bool,
+        row: Optional[int] = None,
+        col: Optional[int] = None,
+        annotation_position: Optional[str] = None,
+        annotation_xshift: Optional[int] = None,
+        annotation_yshift: Optional[int] = None,
+    ):
+        if lower_limit is not None:
+            self._add_limit_line(fig, lower_limit, "LSL", "red", is_horizontal, row, col, annotation_position, annotation_xshift, annotation_yshift)
+        if upper_limit is not None:
+            self._add_limit_line(fig, upper_limit, "USL", "red", is_horizontal, row, col, annotation_position, annotation_xshift, annotation_yshift)
+        if target_value is not None:
+            self._add_limit_line(fig, target_value, "T", "green", is_horizontal, row, col, annotation_position, annotation_xshift, annotation_yshift)
+
 @register_plot
 class BoxPlot(Plot):
     """Interactive box plot of all groups."""
@@ -89,12 +107,7 @@ class BoxPlot(Plot):
         for trace in px.box(df, x=group_col, y=value_col, points="all").data:
             fig.add_trace(trace, row=row, col=col)
 
-        if lower_limit is not None:
-            self._add_limit_line(fig, lower_limit, "LSL", "red", True, row, col, "right", annotation_xshift=10)
-        if upper_limit is not None:
-            self._add_limit_line(fig, upper_limit, "USL", "red", True, row, col, "right", annotation_xshift=10)
-        if target_value is not None:
-            self._add_limit_line(fig, target_value, "T", "green", True, row, col, "right", annotation_xshift=10)
+        self._add_all_limit_lines(fig, lower_limit, upper_limit, target_value, True, row, col, "right", annotation_xshift=10)
         return fig
 
 @register_plot
@@ -116,12 +129,7 @@ class CumulativeFrequencyPlot(Plot):
             cum = np.arange(1, len(vals) + 1) / len(vals)
             fig.add_trace(go.Scatter(x=vals, y=cum, mode="lines", name=str(g)), row=row, col=col)
 
-        if lower_limit is not None:
-            self._add_limit_line(fig, lower_limit, "LSL", "red", False, row, col, "top", annotation_yshift=10)
-        if upper_limit is not None:
-            self._add_limit_line(fig, upper_limit, "USL", "red", False, row, col, "top", annotation_yshift=10)
-        if target_value is not None:
-            self._add_limit_line(fig, target_value, "T", "green", False, row, col, "top", annotation_yshift=10)
+        self._add_all_limit_lines(fig, lower_limit, upper_limit, target_value, False, row, col, "top", annotation_yshift=10)
         return fig
 
 @register_plot
