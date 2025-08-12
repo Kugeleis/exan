@@ -73,13 +73,13 @@ class Plot(ABC):
     def _add_all_limit_lines(
         self,
         fig: go.Figure,
-        limits: Dict[str, Optional[float]], # Renamed from limits_dict
+        limits: Dict[str, Optional[float]], # Consolidated limits
         is_horizontal: bool,
         style_settings: Box, # style_settings is now mandatory
         row: Optional[int] = None,
         col: Optional[int] = None,
     ):
-        limit_styles = style_settings.limits_style
+        limit_styles = style_settings.limits # Changed from limits_style
 
         limits_to_add = [
             (limits.get("lower_limit"), "LSL"),
@@ -150,12 +150,29 @@ class Plot(ABC):
 class BoxPlot(Plot):
     """Interactive box plot of all groups."""
     def plot(self, df: pd.DataFrame, group_col: str, value_col: str,
-             style_settings: Box, # style_settings is now mandatory
-             limits: Dict[str, Optional[float]], # Renamed from limits_dict
+             style_settings: Box,
+             limits: Dict[str, Optional[float]],
              fig: Optional[go.Figure] = None,
              row: Optional[int] = None,
              col: Optional[int] = None,
              results: Optional[List[Dict]] = None) -> go.Figure:
+        """
+        Generates an interactive box plot for the given data.
+
+        Args:
+            df (pd.DataFrame): The input DataFrame.
+            group_col (str): The name of the column used for grouping data.
+            value_col (str): The name of the column containing the values to plot.
+            style_settings (Box): A Box object containing styling configurations.
+            limits (Dict[str, Optional[float]]): A dictionary containing limit values.
+            fig (Optional[go.Figure]): Optional Plotly Figure to add traces to.
+            row (Optional[int]): Row index for subplots.
+            col (Optional[int]): Column index for subplots.
+            results (Optional[List[Dict]]): Optional list of analysis results.
+
+        Returns:
+            go.Figure: The Plotly Figure object with the box plot.
+        """
         if fig is None:
             fig = go.Figure()
 
@@ -170,12 +187,29 @@ class BoxPlot(Plot):
 class CumulativeFrequencyPlot(Plot):
     """Cumulative frequency plot for each group."""
     def plot(self, df: pd.DataFrame, group_col: str, value_col: str,
-             style_settings: Box, # style_settings is now mandatory
-             limits: Dict[str, Optional[float]], # Renamed from limits_dict
+             style_settings: Box,
+             limits: Dict[str, Optional[float]],
              fig: Optional[go.Figure] = None,
              row: Optional[int] = None,
              col: Optional[int] = None,
              results: Optional[List[Dict]] = None) -> go.Figure:
+        """
+        Generates a cumulative frequency plot for the given data.
+
+        Args:
+            df (pd.DataFrame): The input DataFrame.
+            group_col (str): The name of the column used for grouping data.
+            value_col (str): The name of the column containing the values to plot.
+            style_settings (Box): A Box object containing styling configurations.
+            limits (Dict[str, Optional[float]]): A dictionary containing limit values.
+            fig (Optional[go.Figure]): Optional Plotly Figure to add traces to.
+            row (Optional[int]): Row index for subplots.
+            col (Optional[int]): Column index for subplots.
+            results (Optional[List[Dict]]): Optional list of analysis results.
+
+        Returns:
+            go.Figure: The Plotly Figure object with the cumulative frequency plot.
+        """
         if fig is None:
             fig = go.Figure()
 
@@ -195,12 +229,29 @@ class SignificancePlot(Plot):
              df: pd.DataFrame,
              group_col: str,
              value_col: str,
-             style_settings: Box, # style_settings is now mandatory
-             limits: Dict[str, Optional[float]], # Renamed from limits_dict
+             style_settings: Box,
+             limits: Dict[str, Optional[float]],
              fig: Optional[go.Figure] = None,
              row: Optional[int] = None,
              col: Optional[int] = None,
              results: Optional[List[Dict]] = None) -> go.Figure:
+        """
+        Generates a bar chart of p-values for each column.
+
+        Args:
+            df (pd.DataFrame): The input DataFrame (unused by this plot type, but required by ABC).
+            group_col (str): The name of the column used for grouping data (unused by this plot type, but required by ABC).
+            value_col (str): The name of the column containing the values to plot (unused by this plot type, but required by ABC).
+            style_settings (Box): A Box object containing styling configurations.
+            limits (Dict[str, Optional[float]]): A dictionary containing limit values (unused by this plot type, but required by ABC).
+            fig (Optional[go.Figure]): Optional Plotly Figure to add traces to.
+            row (Optional[int]): Row index for subplots.
+            col (Optional[int]): Column index for subplots.
+            results (Optional[List[Dict]]): List of analysis results containing p-values.
+
+        Returns:
+            go.Figure: The Plotly Figure object with the p-value bar chart.
+        """
         if results is None:
             return go.Figure()
 
@@ -212,5 +263,5 @@ class SignificancePlot(Plot):
 
         fig.add_trace(go.Bar(x=columns, y=p_values, name="P-Value"), row=row, col=col)
         fig.add_hline(y=0.05, line_dash="dash", line_color="red", annotation_text="Alpha=0.05", annotation_position="top right", row=row, col=col)
-        self._apply_axis_style(fig, style_settings.axis, row, col, yaxis_name="yaxis", xaxis_name="xaxis")
+        self._apply_axis_style(fig, style_settings.axis, row=row, col=col, yaxis_name="yaxis", xaxis_name="xaxis")
         return fig

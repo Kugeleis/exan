@@ -71,7 +71,7 @@ class LimitsStyles(TypedDict):
     T: LimitsStyle
 
 class StyleConfig(TypedDict, total=False):
-    limits_style: LimitsStyles
+    limits: LimitsStyles # Renamed from limits_style
     axis: AxisStyle
 
 class Config(TypedDict):
