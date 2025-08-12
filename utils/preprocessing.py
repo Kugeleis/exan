@@ -4,6 +4,27 @@ Data preparation utilities, e.g. outlier removal based on sigma threshold.
 """
 
 import pandas as pd
+from typing import Tuple, Dict
+
+def load_data_with_limits(file_path: str) -> Tuple[pd.DataFrame, Dict[str, float]]:
+    """
+    Loads data from a CSV file, extracting limits from the first two lines.
+
+    :param file_path: Path to the CSV file.
+    :return: A tuple containing the DataFrame and a dictionary of limits.
+    """
+    limits = {}
+    with open(file_path, "r") as f:
+        for _ in range(2):  # Read the first two lines for limits
+            line = f.readline()
+            parts = line.strip().split(",")
+            if len(parts) == 2:
+                limit_name, limit_value = parts
+                limits[limit_name] = float(limit_value)
+
+    df = pd.read_csv(file_path, skiprows=2)
+    return df, limits
+
 
 def filter_outliers(
     df: pd.DataFrame,

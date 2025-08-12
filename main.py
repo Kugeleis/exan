@@ -4,6 +4,7 @@ import pandas as pd
 from utils.relevance_decorator import relevance_decorator
 from utils.analyses import AnovaAnalysis, TTestAnalysis, MannWhitneyAnalysis
 from utils.reporting import generate_report
+from utils.preprocessing import load_data_with_limits
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -11,16 +12,7 @@ def main() -> None:
     loader = ConfigLoader("config.yaml")
     config = loader.settings
 
-    limits = {}
-    with open("data/fake.csv", "r") as f:
-        for _ in range(2):  # Read the first two lines for limits
-            line = f.readline()
-            parts = line.strip().split(",")
-            if len(parts) == 2:
-                limit_name, limit_value = parts
-                limits[limit_name] = float(limit_value)
-
-    df = pd.read_csv("data/fake.csv", skiprows=2)
+    df, limits = load_data_with_limits("data/fake.csv")
 
     group_col = config.group_col
     value_cols = [col for col in df.columns if col != group_col]
