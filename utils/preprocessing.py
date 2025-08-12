@@ -4,26 +4,62 @@ Data preparation utilities, e.g. outlier removal based on sigma threshold.
 """
 
 import pandas as pd
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List
 
-def load_data_with_limits(file_path: str) -> Tuple[pd.DataFrame, Dict[str, float]]:
+def load_data_with_limits(file_path: str) -> Tuple[pd.DataFrame, Dict[str, Dict[str, float]]]:
     """
     Loads data from a CSV file, extracting limits from lines starting with "# limit:".
+    Limits can be defined per column, e.g., "# limit: Lower_Limit, 1.0, 0.5"
 
     :param file_path: Path to the CSV file.
     :return: A tuple containing the DataFrame and a dictionary of limits.
+             The limits dictionary will have the structure: 
+             {"Limit_Name": {"Column_Name": Value}}
     """
-    limits = {}
+    limits: Dict[str, Dict[str, float]] = {}
     header_lines = 0
+    column_names: List[str] = []
+
     with open(file_path, "r") as f:
-        for line in f:
+        lines = f.readlines()
+        for i, line in enumerate(lines):
             if line.startswith("# limit:"):
-                parts = line.strip().split(":")[1].split(",")
-                if len(parts) == 2:
-                    limit_name, limit_value = parts
-                    limits[limit_name.strip()] = float(limit_value.strip())
+                parts = [p.strip() for p in line.strip().split(":")[1].split(",")]
+                limit_name = parts[0]
+                limit_values = [float(v) for v in parts[1:]]
+
+                # Assuming the first non-comment line is the header
+                if not column_names:
+                    # Find the actual header line after comments
+                    for j in range(i + 1, len(lines)):
+                        if not lines[j].strip().startswith("#"):
+                            column_names = [col.strip() for col in lines[j].strip().split(",")]
+                            break
+
+                # Exclude the group_col from column_names for limits if it's not a value column
+                # This assumes limits are only for value columns
+                # For now, let's assume all columns after the first are value columns for limits
+                # A more robust solution would involve reading config.group_col here, but that's not possible
+                # within this function without passing config.
+                value_column_names = column_names[1:] # Assuming first column is group_col
+
+                if len(limit_values) == len(value_column_names):
+                    limits[limit_name] = {col_name: val for col_name, val in zip(value_column_names, limit_values)}
+                else:
+                    # Handle cases where limits might be missing for some columns or are generic
+                    # For now, if count doesn't match, store as a single value if only one is provided
+                    if len(limit_values) == 1:
+                        # This case might mean a generic limit for all value columns
+                        # Or it's an error in the CSV format
+                        # For now, we'll store it as a generic limit if it's not column-specific
+                        limits[limit_name] = {"__generic__": limit_values[0]}
+                    else:
+                        # If the number of limits doesn't match the number of value columns, it's ambiguous.
+                        # We'll skip this limit line or log a warning.
+                        pass # Or raise an error/log a warning
+
                 header_lines += 1
-            elif line.startswith("#"):
+            elif line.strip().startswith("#"):
                 header_lines += 1
             else:
                 break

@@ -1,6 +1,6 @@
-# limit: Lower_Limit, 1.0
-# limit: Target, 2.0
-# limit: Upper_Limit, 3.0
+# limit: Lower_Limit, 1.0,0.5
+# limit: Target, 2.0,1
+# limit: Upper_Limit, 3.0,2
 Group,Value,Data2
 A,2.13,1.23
 A,1.97,4.56
