@@ -25,6 +25,21 @@ tasks:
     cmds:
       - uv run pytest
 
+  bump:patch:
+    desc: "Bump the patch version of the project"
+    cmds:
+      - uv run bump-my-version bump patch
+
+  bump:minor:
+    desc: "Bump the minor version of the project"
+    cmds:
+      - uv run bump-my-version bump minor
+
+  bump:major:
+    desc: "Bump the major version of the project"
+    cmds:
+      - uv run bump-my-version bump major
+
   run:
     desc: "Run the main analysis script"
     cmds:

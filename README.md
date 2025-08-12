@@ -33,6 +33,23 @@ Exan is a configurable data analysis tool that allows you to run various statist
     ```
 4.  The analysis results will be printed to the console, and the plots will be saved as HTML files in the root directory.
 
+## Versioning
+
+This project uses [`bump-my-version`](https://github.com/callowayproject/bump-my-version) to manage version numbers. To release a new version, use the `bump-my-version` command. For example, to bump the patch version, run:
+
+```bash
+uv run bump-my-version patch
+```
+
+You can also bump the `minor` or `major` version:
+
+```bash
+uv run bump-my-version minor
+uv run bump-my-version major
+```
+
+This will automatically update the version in `pyproject.toml`, create a new git commit, and tag the commit with the new version.
+
 ## Configuration
 
 The analysis pipeline is configured in the `config.yaml` file. Here is an example configuration:
