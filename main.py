@@ -5,7 +5,7 @@ from utils.relevance_decorator import relevance_decorator
 from utils.analyses import AnovaAnalysis, TTestAnalysis, MannWhitneyAnalysis
 from utils.reporting import generate_report as _generate_report_actual # Renamed to avoid shadowing
 from utils.preprocessing import load_data_with_limits
-from typing import List, Dict, Tuple, cast
+from typing import Tuple, cast
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 from utils.types_custom import Config, AnalysisConfig, PlotConfig, AnalysisResult, OutputConfig
@@ -52,7 +52,7 @@ def process_columns(df: pd.DataFrame, config: Config, limits: dict[str, float]) 
                     relevance_threshold,
                 )(func)
             result: AnalysisResult = func(df, group_col, value_col)
-            result['column'] = value_col
+            result['column'] = value_col # pyright: ignore[reportGeneralTypeIssues]
             results.append(result)
             logging.info(f"{analysis_cls.__name__} for {value_col}: {result}")
 
