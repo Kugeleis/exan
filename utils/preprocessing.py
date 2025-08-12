@@ -8,21 +8,27 @@ from typing import Tuple, Dict
 
 def load_data_with_limits(file_path: str) -> Tuple[pd.DataFrame, Dict[str, float]]:
     """
-    Loads data from a CSV file, extracting limits from the first two lines.
+    Loads data from a CSV file, extracting limits from lines starting with "# limit:".
 
     :param file_path: Path to the CSV file.
     :return: A tuple containing the DataFrame and a dictionary of limits.
     """
     limits = {}
+    header_lines = 0
     with open(file_path, "r") as f:
-        for _ in range(2):  # Read the first two lines for limits
-            line = f.readline()
-            parts = line.strip().split(",")
-            if len(parts) == 2:
-                limit_name, limit_value = parts
-                limits[limit_name] = float(limit_value)
+        for line in f:
+            if line.startswith("# limit:"):
+                parts = line.strip().split(":")[1].split(",")
+                if len(parts) == 2:
+                    limit_name, limit_value = parts
+                    limits[limit_name.strip()] = float(limit_value.strip())
+                header_lines += 1
+            elif line.startswith("#"):
+                header_lines += 1
+            else:
+                break
 
-    df = pd.read_csv(file_path, skiprows=2)
+    df = pd.read_csv(file_path, skiprows=lambda x: x < header_lines)
     return df, limits
 
 
