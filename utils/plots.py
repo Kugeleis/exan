@@ -9,8 +9,9 @@ import plotly.graph_objects as go
 from .plot_registry import register_plot
 from plotly.subplots import make_subplots
 from typing import List, Dict, Optional
+from abc import ABC, abstractmethod
 
-class Plot:
+class Plot(ABC):
     """Base class for all plot types."""
     def plot(
         self,
