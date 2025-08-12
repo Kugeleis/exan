@@ -5,10 +5,22 @@ import tempfile
 import os
 from abc import ABC, abstractmethod
 from typing import List, Dict
-from .types_custom import Config
+from .types_custom import Config, AnalysisResult
 
 class ReportGenerator(ABC):
-    def __init__(self, plots: dict[str, go.Figure], results: List[Dict], config: Config):
+    """
+    Abstract base class for all report generators.
+
+    Attributes:
+        plots (dict[str, go.Figure]): A dictionary of plot figures, where keys are plot names.
+        results (List[Dict]): A list of analysis results, each a dictionary.
+        config (Config): The configuration object for the report.
+        output_config (dict): Configuration specific to output settings.
+        report_config (dict): Configuration specific to report details.
+        output_dir (Path): The directory where reports will be saved.
+        prefix (str): The prefix for report filenames.
+    """
+    def __init__(self, plots: dict[str, go.Figure], results: List[AnalysisResult], config: Config):
         self.plots = plots
         self.results = results
         self.config = config
@@ -20,17 +32,27 @@ class ReportGenerator(ABC):
         self._sort_plots_by_significance()
 
     def _sort_plots_by_significance(self):
+        """
+        Sorts the plots dictionary based on the p-value of the corresponding analysis results.
+        Plots with lower p-values (higher significance) come first.
+        """
         if not self.results:
             return
 
         # Create a dictionary to map column names to p-values
-        p_values = {result['column']: result['p_value'] for result in self.results}
+        p_values = {result['column']: result['p_value'] for result in self.results if 'column' in result and 'p_value' in result}
 
         # Sort the plots based on the p-value of the corresponding column
+        # The plot name is expected to be in the format "{plot_type}_{column_name}"
         self.plots = dict(sorted(self.plots.items(), key=lambda item: p_values.get(item[0].split('_')[-1], float('inf'))))
 
     def _generate_overview_table_html(self) -> str:
-        """Generates an HTML table for the overview of results."""
+        """
+        Generates an HTML table for the overview of analysis results.
+
+        Returns:
+            str: An HTML string representing the overview table.
+        """
         if not self.results:
             return ""
 
@@ -41,8 +63,13 @@ class ReportGenerator(ABC):
         html += "</table>"
         return html
 
-    def _generate_overview_table_pdf(self, pdf):
-        """Generates a PDF table for the overview of results."""
+    def _generate_overview_table_pdf(self, pdf: FPDF):
+        """
+        Generates a PDF table for the overview of analysis results.
+
+        Args:
+            pdf (FPDF): The FPDF object to which the table will be added.
+        """
         if not self.results:
             return
 
@@ -68,11 +95,20 @@ class ReportGenerator(ABC):
 
     @abstractmethod
     def generate(self):
+        """
+        Abstract method to generate the report. Must be implemented by subclasses.
+        """
         pass
 
 
 class InteractiveHTMLReportGenerator(ReportGenerator):
+    """
+    Generates an interactive HTML report.
+    """
     def generate(self):
+        """
+        Generates the interactive HTML report and saves it to the output directory.
+        """
         filename = self.output_dir / f"{self.prefix}.html"
         with open(filename, 'w') as f:
             f.write("<html><head><title>Analysis Report</title></head><body>")
@@ -90,7 +126,13 @@ class InteractiveHTMLReportGenerator(ReportGenerator):
 
 
 class StaticHTMLReportGenerator(ReportGenerator):
+    """
+    Generates a static HTML report.
+    """
     def generate(self):
+        """
+        Generates the static HTML report and saves it to the output directory.
+        """
         filename = self.output_dir / f"{self.prefix}_static.html"
         with open(filename, 'w') as f:
             f.write("<html><head><title>Static Analysis Report</title></head><body>")
@@ -108,7 +150,13 @@ class StaticHTMLReportGenerator(ReportGenerator):
 
 
 class PDFReportGenerator(ReportGenerator):
+    """
+    Generates a PDF report.
+    """
     def generate(self):
+        """
+        Generates the PDF report and saves it to the output directory.
+        """
         pdf = FPDF()
         pdf.set_auto_page_break(auto=True, margin=15)
 
@@ -139,7 +187,22 @@ class PDFReportGenerator(ReportGenerator):
         pdf.output(str(pdf_filename))
 
 
-def report_generator_factory(format: str, plots: dict[str, go.Figure], results: List[Dict], config: Config) -> ReportGenerator:
+def report_generator_factory(format: str, plots: dict[str, go.Figure], results: List[AnalysisResult], config: Config) -> ReportGenerator:
+    """
+    Factory function to create a ReportGenerator instance based on the specified format.
+
+    Args:
+        format (str): The desired report format (e.g., "interactive_html", "static_html", "pdf").
+        plots (dict[str, go.Figure]): A dictionary of plot figures.
+        results (List[AnalysisResult]): A list of analysis results.
+        config (Config): The configuration object.
+
+    Returns:
+        ReportGenerator: An instance of a concrete ReportGenerator subclass.
+
+    Raises:
+        ValueError: If an unknown report format is provided.
+    """
     if format == "interactive_html":
         return InteractiveHTMLReportGenerator(plots, results, config)
     elif format == "static_html":
@@ -149,9 +212,14 @@ def report_generator_factory(format: str, plots: dict[str, go.Figure], results: 
     else:
         raise ValueError(f"Unknown report format: {format}")
 
-def generate_report(plots: dict[str, go.Figure], results: List[Dict], config: Config):
+def generate_report(plots: dict[str, go.Figure], results: list[AnalysisResult], config: Config):
     """
     Generates a report containing multiple plots in various formats.
+
+    Args:
+        plots (dict[str, go.Figure]): A dictionary of plot figures.
+        results (list[AnalysisResult]): A list of analysis results.
+        config (Config): The configuration object.
     """
     output_config = config["output"]
 
