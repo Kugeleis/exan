@@ -27,7 +27,7 @@ class Plot(ABC):
         row: Optional[int] = None,
         col: Optional[int] = None,
         results: Optional[List[Dict]] = None,
-        style_settings: Optional[Box] = None, # Added style_settings
+        style_settings: Box = None, # style_settings is now mandatory
     ) -> go.Figure:
         raise NotImplementedError
 
@@ -81,17 +81,9 @@ class Plot(ABC):
         is_horizontal: bool,
         row: Optional[int] = None,
         col: Optional[int] = None,
-        style_settings: Optional[Box] = None, # Added style_settings
+        style_settings: Box = None, # style_settings is now mandatory
     ):
-        if style_settings is None or "limits_style" not in style_settings:
-            # Fallback to hardcoded values if style_settings is not provided or incomplete
-            limit_styles = {
-                "LSL": {"annotation_text": "LSL", "line_color": "red", "annotation_position_horizontal": "right", "annotation_xshift_horizontal": 10, "annotation_position_vertical": "top", "annotation_yshift_vertical": 10},
-                "USL": {"annotation_text": "USL", "line_color": "red", "annotation_position_horizontal": "right", "annotation_xshift_horizontal": 10, "annotation_position_vertical": "top", "annotation_yshift_vertical": 10},
-                "T": {"annotation_text": "T", "line_color": "green", "annotation_position_horizontal": "right", "annotation_xshift_horizontal": 10, "annotation_position_vertical": "top", "annotation_yshift_vertical": 10},
-            }
-        else:
-            limit_styles = style_settings.limits_style
+        limit_styles = style_settings.limits_style
 
         limits_to_add = [
             (lower_limit, "LSL"),
@@ -101,18 +93,18 @@ class Plot(ABC):
 
         for limit_value, limit_key in limits_to_add:
             if limit_value is not None:
-                style = limit_styles.get(limit_key, {})
-                annotation_text = style.get("annotation_text", limit_key)
-                line_color = style.get("line_color", "red" if limit_key != "T" else "green")
+                style = limit_styles[limit_key]
+                annotation_text = style["annotation_text"]
+                line_color = style["line_color"]
 
                 if is_horizontal:
-                    annotation_position = style.get("annotation_position_horizontal", "right")
-                    annotation_xshift = style.get("annotation_xshift_horizontal", 10)
+                    annotation_position = style["annotation_position_horizontal"]
+                    annotation_xshift = style["annotation_xshift_horizontal"]
                     annotation_yshift = style.get("annotation_yshift_horizontal", None)
                 else:
-                    annotation_position = style.get("annotation_position_vertical", "top")
+                    annotation_position = style["annotation_position_vertical"]
                     annotation_xshift = style.get("annotation_xshift_vertical", None)
-                    annotation_yshift = style.get("annotation_yshift_vertical", 10)
+                    annotation_yshift = style["annotation_yshift_vertical"]
 
                 self._add_limit_line(
                     fig,
@@ -129,14 +121,14 @@ class Plot(ABC):
 
     def _get_axis_updates(self, axis_style: Box) -> dict:
         updates = {}
-        if "font_size" in axis_style: updates["tickfont_size"] = axis_style.font_size
-        if "font_color" in axis_style: updates["tickfont_color"] = axis_style.font_color
-        if "title_font_size" in axis_style: updates["title_font_size"] = axis_style.title_font_size
-        if "title_font_color" in axis_style: updates["title_font_color"] = axis_style.title_font_color
-        if "show_grid" in axis_style: updates["showgrid"] = axis_style.show_grid
-        if "grid_color" in axis_style: updates["gridcolor"] = axis_style.grid_color
-        if "zero_line" in axis_style: updates["zeroline"] = axis_style.zero_line
-        if "zero_line_color" in axis_style: updates["zerolinecolor"] = axis_style.zero_line_color
+        updates["tickfont_size"] = axis_style.font_size
+        updates["tickfont_color"] = axis_style.font_color
+        updates["title_font_size"] = axis_style.title_font_size
+        updates["title_font_color"] = axis_style.title_font_color
+        updates["showgrid"] = axis_style.show_grid
+        updates["gridcolor"] = axis_style.grid_color
+        updates["zeroline"] = axis_style.zero_line
+        updates["zerolinecolor"] = axis_style.zero_line_color
         return updates
 
     def _apply_axis_style(
@@ -148,9 +140,6 @@ class Plot(ABC):
         xaxis_name: str = "xaxis",
         yaxis_name: str = "yaxis",
     ):
-        if axis_style is None:
-            return
-
         xaxis_updates = self._get_axis_updates(axis_style)
         yaxis_updates = self._get_axis_updates(axis_style)
 
@@ -172,7 +161,7 @@ class BoxPlot(Plot):
              row: Optional[int] = None,
              col: Optional[int] = None,
              results: Optional[List[Dict]] = None,
-             style_settings: Optional[Box] = None) -> go.Figure:
+             style_settings: Box = None) -> go.Figure:
         if fig is None:
             fig = go.Figure()
 
@@ -180,8 +169,7 @@ class BoxPlot(Plot):
             fig.add_trace(trace, row=row, col=col)
 
         self._add_all_limit_lines(fig, lower_limit, upper_limit, target_value, True, row, col, style_settings=style_settings)
-        if style_settings and "axis" in style_settings:
-            self._apply_axis_style(fig, style_settings.axis, row, col, yaxis_name="yaxis")
+        self._apply_axis_style(fig, style_settings.axis, row, col, yaxis_name="yaxis")
         return fig
 
 @register_plot
@@ -195,7 +183,7 @@ class CumulativeFrequencyPlot(Plot):
              row: Optional[int] = None,
              col: Optional[int] = None,
              results: Optional[List[Dict]] = None,
-             style_settings: Optional[Box] = None) -> go.Figure:
+             style_settings: Box = None) -> go.Figure:
         if fig is None:
             fig = go.Figure()
 
@@ -205,8 +193,7 @@ class CumulativeFrequencyPlot(Plot):
             fig.add_trace(go.Scatter(x=vals, y=cum, mode="lines", name=str(g)), row=row, col=col)
 
         self._add_all_limit_lines(fig, lower_limit, upper_limit, target_value, False, row, col, style_settings=style_settings)
-        if style_settings and "axis" in style_settings:
-            self._apply_axis_style(fig, style_settings.axis, row, col, xaxis_name="xaxis")
+        self._apply_axis_style(fig, style_settings.axis, row, col, xaxis_name="xaxis")
         return fig
 
 @register_plot
@@ -223,7 +210,7 @@ class SignificancePlot(Plot):
              row: Optional[int] = None,
              col: Optional[int] = None,
              results: Optional[List[Dict]] = None,
-             style_settings: Optional[Box] = None) -> go.Figure:
+             style_settings: Box = None) -> go.Figure:
         if results is None:
             return go.Figure()
 
@@ -235,6 +222,5 @@ class SignificancePlot(Plot):
 
         fig.add_trace(go.Bar(x=columns, y=p_values, name="P-Value"), row=row, col=col)
         fig.add_hline(y=0.05, line_dash="dash", line_color="red", annotation_text="Alpha=0.05", annotation_position="top right", row=row, col=col)
-        if style_settings and "axis" in style_settings:
-            self._apply_axis_style(fig, style_settings.axis, row, col, yaxis_name="yaxis", xaxis_name="xaxis")
+        self._apply_axis_style(fig, style_settings.axis, row, col, yaxis_name="yaxis", xaxis_name="xaxis")
         return fig

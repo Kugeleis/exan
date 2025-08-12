@@ -67,6 +67,55 @@ output:
 *   `plots`: A list of plots to generate. Each plot is a dictionary with a `name` key.
 *   `output`: A dictionary with output options, such as the width and height of the plots.
 
+### Style Configuration (`style.yaml`)
+
+The `style.yaml` file is mandatory and defines the visual styling for various plot elements. It must be present in the root directory of the project.
+
+Here is an example `style.yaml` configuration:
+
+```yaml
+limits_style:
+  LSL:
+    annotation_text: "LSL"
+    line_color: "red"
+    annotation_position_horizontal: "right"
+    annotation_xshift_horizontal: 10
+    annotation_position_vertical: "top"
+    annotation_yshift_vertical: 10
+  USL:
+    annotation_text: "USL"
+    line_color: "red"
+    annotation_position_horizontal: "right"
+    annotation_xshift_horizontal: 10
+    annotation_position_vertical: "top"
+    annotation_yshift_vertical: 10
+  T:
+    annotation_text: "T"
+    line_color: "green"
+    annotation_position_horizontal: "right"
+    annotation_xshift_horizontal: 10
+    annotation_position_vertical: "top"
+    annotation_yshift_vertical: 10
+
+axis:
+  font_size: 12
+  font_color: "black"
+  title_font_size: 14
+  title_font_color: "gray"
+  show_grid: true
+  grid_color: "lightgray"
+  zero_line: true
+  zero_line_color: "black"
+```
+
+*   `limits_style`: Defines the styling for limit lines (LSL, USL, Target).
+    *   Each limit (LSL, USL, T) can have specific `annotation_text`, `line_color`, and positioning for both horizontal and vertical lines.
+*   `axis`: Defines common styling properties for plot axes.
+    *   `font_size`, `font_color`: For tick labels.
+    *   `title_font_size`, `title_font_color`: For axis titles.
+    *   `show_grid`, `grid_color`: For grid lines.
+    *   `zero_line`, `zero_line_color`: For the zero axis line.
+
 ## Extending the Tool
 
 ### Adding a new Analysis

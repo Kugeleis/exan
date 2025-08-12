@@ -10,6 +10,7 @@ class ConfigLoader:
     def __init__(self, config_file: str = "config.yaml", style_file: str = "style.yaml"):
         self.config_file = Path(config_file)
         self.style_file = Path(style_file)
+        # Box.from_yaml will raise an error if the file is not found, making it mandatory
         self._config: Config = Box.from_yaml(filename=self.config_file)
         self._style_config: Box = Box.from_yaml(filename=self.style_file)
         self._validate()
