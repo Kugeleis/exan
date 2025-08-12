@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 from utils.relevance_decorator import relevance_decorator
 from utils.analyses import AnovaAnalysis, TTestAnalysis, MannWhitneyAnalysis
-from utils.reporting import generate_report
+from utils.reporting import generate_report as _generate_report_actual # Renamed to avoid shadowing
 from utils.preprocessing import load_data_with_limits
 from typing import List, Dict, Tuple, cast
 from plotly.subplots import make_subplots
@@ -86,7 +86,7 @@ def generate_reports(plots: dict[str, go.Figure], results: list[AnalysisResult],
         or output_config.get("save_static_html")
         or output_config.get("save_pdf")
     ):
-        generate_report(plots, results, config)
+        _generate_report_actual(plots, results, config)
 
 def main() -> None:
     """
