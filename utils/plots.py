@@ -7,6 +7,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from .plot_registry import register_plot
+from plotly.subplots import make_subplots
 from typing import List, Dict, Optional
 from abc import ABC, abstractmethod
 from box import Box # Import Box for style_settings
@@ -82,7 +83,7 @@ class Plot(ABC):
         col: Optional[int] = None,
         style_settings: Optional[Box] = None, # Added style_settings
     ):
-        if style_settings is None or "limits" not in style_settings:
+        if style_settings is None or "limits_style" not in style_settings:
             # Fallback to hardcoded values if style_settings is not provided or incomplete
             limit_styles = {
                 "LSL": {"annotation_text": "LSL", "line_color": "red", "annotation_position_horizontal": "right", "annotation_xshift_horizontal": 10, "annotation_position_vertical": "top", "annotation_yshift_vertical": 10},
@@ -90,7 +91,7 @@ class Plot(ABC):
                 "T": {"annotation_text": "T", "line_color": "green", "annotation_position_horizontal": "right", "annotation_xshift_horizontal": 10, "annotation_position_vertical": "top", "annotation_yshift_vertical": 10},
             }
         else:
-            limit_styles = style_settings.limits
+            limit_styles = style_settings.limits_style
 
         limits_to_add = [
             (lower_limit, "LSL"),
@@ -126,6 +127,18 @@ class Plot(ABC):
                     annotation_yshift,
                 )
 
+    def _get_axis_updates(self, axis_style: Box) -> dict:
+        updates = {}
+        if "font_size" in axis_style: updates["tickfont_size"] = axis_style.font_size
+        if "font_color" in axis_style: updates["tickfont_color"] = axis_style.font_color
+        if "title_font_size" in axis_style: updates["title_font_size"] = axis_style.title_font_size
+        if "title_font_color" in axis_style: updates["title_font_color"] = axis_style.title_font_color
+        if "show_grid" in axis_style: updates["showgrid"] = axis_style.show_grid
+        if "grid_color" in axis_style: updates["gridcolor"] = axis_style.grid_color
+        if "zero_line" in axis_style: updates["zeroline"] = axis_style.zero_line
+        if "zero_line_color" in axis_style: updates["zerolinecolor"] = axis_style.zero_line_color
+        return updates
+
     def _apply_axis_style(
         self,
         fig: go.Figure,
@@ -138,27 +151,8 @@ class Plot(ABC):
         if axis_style is None:
             return
 
-        # Apply to x-axis
-        xaxis_updates = {}
-        if "font_size" in axis_style: xaxis_updates["tickfont_size"] = axis_style.font_size
-        if "font_color" in axis_style: xaxis_updates["tickfont_color"] = axis_style.font_color
-        if "title_font_size" in axis_style: xaxis_updates["title_font_size"] = axis_style.title_font_size
-        if "title_font_color" in axis_style: xaxis_updates["title_font_color"] = axis_style.title_font_color
-        if "show_grid" in axis_style: xaxis_updates["showgrid"] = axis_style.show_grid
-        if "grid_color" in axis_style: xaxis_updates["gridcolor"] = axis_style.grid_color
-        if "zero_line" in axis_style: xaxis_updates["zeroline"] = axis_style.zero_line
-        if "zero_line_color" in axis_style: xaxis_updates["zerolinecolor"] = axis_style.zero_line_color
-
-        # Apply to y-axis
-        yaxis_updates = {}
-        if "font_size" in axis_style: yaxis_updates["tickfont_size"] = axis_style.font_size
-        if "font_color" in axis_style: yaxis_updates["tickfont_color"] = axis_style.font_color
-        if "title_font_size" in axis_style: yaxis_updates["title_font_size"] = axis_style.title_font_size
-        if "title_font_color" in axis_style: yaxis_updates["title_font_color"] = axis_style.title_font_color
-        if "show_grid" in axis_style: yaxis_updates["showgrid"] = axis_style.show_grid
-        if "grid_color" in axis_style: yaxis_updates["gridcolor"] = axis_style.grid_color
-        if "zero_line" in axis_style: yaxis_updates["zeroline"] = axis_style.zero_line
-        if "zero_line_color" in axis_style: yaxis_updates["zerolinecolor"] = axis_style.zero_line_color
+        xaxis_updates = self._get_axis_updates(axis_style)
+        yaxis_updates = self._get_axis_updates(axis_style)
 
         if row is not None and col is not None:
             fig.update_layout(**{f"{xaxis_name}{row if row > 1 else ''}": xaxis_updates})
