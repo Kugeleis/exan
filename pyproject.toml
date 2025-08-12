@@ -17,7 +17,7 @@ dependencies = [
     "typing-extensions>=4.12.2",
 ]
 
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
     "ipykernel>=6.30.1",
     "pytest>=8.4.1",
