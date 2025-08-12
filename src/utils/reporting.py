@@ -6,6 +6,21 @@ import os
 from abc import ABC, abstractmethod
 from typing import List, cast
 from .types_custom import Config, AnalysisResult
+import re
+
+def get_project_version():
+    """
+    Reads the project version from the pyproject.toml file.
+
+    Returns:
+        str: The project version number.
+    """
+    with open("pyproject.toml", "r") as f:
+        content = f.read()
+        match = re.search(r"version = \"(.*?)\"", content)
+        if match:
+            return match.group(1)
+        return "unknown"
 
 class ReportGenerator(ABC):
     """
@@ -29,6 +44,7 @@ class ReportGenerator(ABC):
         self.output_dir = Path(self.output_config["output_directory"])
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.prefix = self.report_config["name"]
+        self.project_version = get_project_version()
         self._sort_plots_by_significance()
 
     def _sort_plots_by_significance(self):
@@ -137,6 +153,7 @@ class InteractiveHTMLReportGenerator(ReportGenerator):
         filename = self.output_dir / f"{self.prefix}.html"
         with open(filename, 'w') as f:
             f.write("<html><head><title>Analysis Report</title></head><body><a name=\"top\"></a>")
+            f.write(f"<p>Made with exan v{self.project_version}</p>")
             f.write("<h1>Analysis Report</h1>")
             f.write("<h2>Report Information</h2>")
             f.write("<ul>")
@@ -163,6 +180,7 @@ class StaticHTMLReportGenerator(ReportGenerator):
         filename = self.output_dir / f"{self.prefix}_static.html"
         with open(filename, 'w') as f:
             f.write("<html><head><title>Static Analysis Report</title></head><body><a name=\"top\"></a>")
+            f.write(f"<p>Made with exan v{self.project_version}</p>")
             f.write("<h1>Static Analysis Report</h1>")
             f.write("<h2>Report Information</h2>")
             f.write("<ul>")
@@ -191,6 +209,8 @@ class PDFReportGenerator(ReportGenerator):
 
         # Title Page
         pdf.add_page()
+        pdf.set_font("Arial", "", 12)
+        pdf.cell(0, 10, f"Made with exan v{self.project_version}", 0, 1, "C")
         pdf.set_font("Arial", "B", 24)
         pdf.cell(0, 20, "Analysis Report", 0, 1, "C")
         pdf.set_font("Arial", "B", 16)

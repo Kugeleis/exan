@@ -52,9 +52,10 @@ def mock_results():
         },
     ]
 
+@patch("utils.reporting.get_project_version", return_value="0.0.0")
 @patch("pathlib.Path.mkdir")
 @patch("builtins.open", new_callable=mock_open)
-def test_interactive_html_report_generator(mock_file_open, mock_mkdir, mock_plots, mock_results, mock_config):
+def test_interactive_html_report_generator(mock_file_open, mock_mkdir, mock_get_version, mock_plots, mock_results, mock_config):
     generator = InteractiveHTMLReportGenerator(mock_plots, mock_results, mock_config)
     generator.generate()
 
@@ -65,9 +66,10 @@ def test_interactive_html_report_generator(mock_file_open, mock_mkdir, mock_plot
     handle.write.assert_any_call("<html><head><title>Analysis Report</title></head><body><a name=\"top\"></a>")
     handle.write.assert_any_call("<h1>Analysis Report</h1>")
 
+@patch("utils.reporting.get_project_version", return_value="0.0.0")
 @patch("pathlib.Path.mkdir")
 @patch("builtins.open", new_callable=mock_open)
-def test_static_html_report_generator(mock_file_open, mock_mkdir, mock_plots, mock_results, mock_config):
+def test_static_html_report_generator(mock_file_open, mock_mkdir, mock_get_version, mock_plots, mock_results, mock_config):
     generator = StaticHTMLReportGenerator(mock_plots, mock_results, mock_config)
     generator.generate()
 
@@ -79,12 +81,13 @@ def test_static_html_report_generator(mock_file_open, mock_mkdir, mock_plots, mo
     handle.write.assert_any_call("<h1>Static Analysis Report</h1>")
 
 
+@patch("utils.reporting.get_project_version", return_value="0.0.0")
 @patch("pathlib.Path.mkdir")
 @patch("utils.reporting.FPDF")
 @patch("plotly.graph_objects.Figure.write_image")
 @patch("utils.reporting.tempfile.NamedTemporaryFile")
 @patch("utils.reporting.os.remove")
-def test_pdf_report_generator(mock_os_remove, mock_tempfile, mock_write_image, mock_fpdf, mock_mkdir, mock_plots, mock_results, mock_config):
+def test_pdf_report_generator(mock_os_remove, mock_tempfile, mock_write_image, mock_fpdf, mock_mkdir, mock_get_version, mock_plots, mock_results, mock_config):
     # Mock the temporary file context manager
     mock_temp_file_instance = MagicMock()
     mock_temp_file_instance.__enter__.return_value.name = "temp_image.png"
