@@ -44,24 +44,24 @@ def mock_style_settings():
     })
 
 @pytest.fixture
-def mock_limits_dict():
+def mock_limits(): # Renamed from mock_limits_dict
     return {
         "lower_limit": 1.0,
         "upper_limit": 5.0,
         "target_value": 3.0,
     }
 
-def test_boxplot_returns_figure(mock_df, mock_style_settings, mock_limits_dict):
+def test_boxplot_returns_figure(mock_df, mock_style_settings, mock_limits):
     plotter = BoxPlot()
-    fig = plotter.plot(mock_df, 'group', 'value', limits_dict=mock_limits_dict, style_settings=mock_style_settings)
+    fig = plotter.plot(mock_df, 'group', 'value', style_settings=mock_style_settings, limits=mock_limits)
     assert isinstance(fig, go.Figure)
 
-def test_cumulative_frequency_plot_returns_figure(mock_df, mock_style_settings, mock_limits_dict):
+def test_cumulative_frequency_plot_returns_figure(mock_df, mock_style_settings, mock_limits):
     plotter = CumulativeFrequencyPlot()
-    fig = plotter.plot(mock_df, 'group', 'value', limits_dict=mock_limits_dict, style_settings=mock_style_settings)
+    fig = plotter.plot(mock_df, 'group', 'value', style_settings=mock_style_settings, limits=mock_limits)
     assert isinstance(fig, go.Figure)
 
-def test_significance_plot_returns_figure(mock_df, mock_style_settings, mock_results, mock_limits_dict):
+def test_significance_plot_returns_figure(mock_df, mock_style_settings, mock_results, mock_limits):
     plotter = SignificancePlot()
-    fig = plotter.plot(mock_df, 'group', 'value', limits_dict=mock_limits_dict, results=mock_results, style_settings=mock_style_settings)
+    fig = plotter.plot(mock_df, 'group', 'value', style_settings=mock_style_settings, limits=mock_limits, results=mock_results)
     assert isinstance(fig, go.Figure)

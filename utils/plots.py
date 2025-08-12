@@ -20,12 +20,12 @@ class Plot(ABC):
         df: pd.DataFrame,
         group_col: str,
         value_col: str,
-        limits_dict: Dict[str, Optional[float]], # Consolidated limits
+        style_settings: Box, # style_settings is now mandatory and before optional args
+        limits: Dict[str, Optional[float]], # Renamed from limits_dict
         fig: Optional[go.Figure] = None,
         row: Optional[int] = None,
         col: Optional[int] = None,
         results: Optional[List[Dict]] = None,
-        style_settings: Box = None, # style_settings is now mandatory
     ) -> go.Figure:
         raise NotImplementedError
 
@@ -73,18 +73,18 @@ class Plot(ABC):
     def _add_all_limit_lines(
         self,
         fig: go.Figure,
-        limits_dict: Dict[str, Optional[float]], # Consolidated limits
+        limits: Dict[str, Optional[float]], # Renamed from limits_dict
         is_horizontal: bool,
+        style_settings: Box, # style_settings is now mandatory
         row: Optional[int] = None,
         col: Optional[int] = None,
-        style_settings: Box = None, # style_settings is now mandatory
     ):
         limit_styles = style_settings.limits_style
 
         limits_to_add = [
-            (limits_dict.get("lower_limit"), "LSL"),
-            (limits_dict.get("upper_limit"), "USL"),
-            (limits_dict.get("target_value"), "T"),
+            (limits.get("lower_limit"), "LSL"),
+            (limits.get("upper_limit"), "USL"),
+            (limits.get("target_value"), "T"),
         ]
 
         for limit_value, limit_key in limits_to_add:
@@ -150,19 +150,19 @@ class Plot(ABC):
 class BoxPlot(Plot):
     """Interactive box plot of all groups."""
     def plot(self, df: pd.DataFrame, group_col: str, value_col: str,
-             limits_dict: Dict[str, Optional[float]], # Consolidated limits
+             style_settings: Box, # style_settings is now mandatory
+             limits: Dict[str, Optional[float]], # Renamed from limits_dict
              fig: Optional[go.Figure] = None,
              row: Optional[int] = None,
              col: Optional[int] = None,
-             results: Optional[List[Dict]] = None,
-             style_settings: Box = None) -> go.Figure:
+             results: Optional[List[Dict]] = None) -> go.Figure:
         if fig is None:
             fig = go.Figure()
 
         for trace in px.box(df, x=group_col, y=value_col, points="all").data:
             fig.add_trace(trace, row=row, col=col)
 
-        self._add_all_limit_lines(fig, limits_dict, True, style_settings=style_settings, row=row, col=col)
+        self._add_all_limit_lines(fig, limits, True, style_settings=style_settings, row=row, col=col)
         self._apply_axis_style(fig, style_settings.axis, row=row, col=col, yaxis_name="yaxis")
         return fig
 
@@ -170,12 +170,12 @@ class BoxPlot(Plot):
 class CumulativeFrequencyPlot(Plot):
     """Cumulative frequency plot for each group."""
     def plot(self, df: pd.DataFrame, group_col: str, value_col: str,
-             limits_dict: Dict[str, Optional[float]], # Consolidated limits
+             style_settings: Box, # style_settings is now mandatory
+             limits: Dict[str, Optional[float]], # Renamed from limits_dict
              fig: Optional[go.Figure] = None,
              row: Optional[int] = None,
              col: Optional[int] = None,
-             results: Optional[List[Dict]] = None,
-             style_settings: Box = None) -> go.Figure:
+             results: Optional[List[Dict]] = None) -> go.Figure:
         if fig is None:
             fig = go.Figure()
 
@@ -184,7 +184,7 @@ class CumulativeFrequencyPlot(Plot):
             cum = np.arange(1, len(vals) + 1) / len(vals)
             fig.add_trace(go.Scatter(x=vals, y=cum, mode="lines", name=str(g)), row=row, col=col)
 
-        self._add_all_limit_lines(fig, limits_dict, False, style_settings=style_settings, row=row, col=col)
+        self._add_all_limit_lines(fig, limits, False, style_settings=style_settings, row=row, col=col)
         self._apply_axis_style(fig, style_settings.axis, row=row, col=col, xaxis_name="xaxis")
         return fig
 
@@ -195,12 +195,12 @@ class SignificancePlot(Plot):
              df: pd.DataFrame,
              group_col: str,
              value_col: str,
-             limits_dict: Dict[str, Optional[float]], # Consolidated limits
+             style_settings: Box, # style_settings is now mandatory
+             limits: Dict[str, Optional[float]], # Renamed from limits_dict
              fig: Optional[go.Figure] = None,
              row: Optional[int] = None,
              col: Optional[int] = None,
-             results: Optional[List[Dict]] = None,
-             style_settings: Box = None) -> go.Figure:
+             results: Optional[List[Dict]] = None) -> go.Figure:
         if results is None:
             return go.Figure()
 

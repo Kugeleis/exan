@@ -13,13 +13,13 @@ from box import Box # Import Box for style_settings
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-def process_columns(df: pd.DataFrame, config: Config, limits: Dict[str, Dict[str, float]], style_settings: Box) -> Tuple[dict[str, go.Figure], list[AnalysisResult]]:
+def process_columns(df: pd.DataFrame, config: Config, all_limits: Dict[str, Dict[str, float]], style_settings: Box) -> Tuple[dict[str, go.Figure], list[AnalysisResult]]:
     """
     Process each value column in the DataFrame, performing analyses and generating plots.
 
     :param df: The input DataFrame.
     :param config: The configuration dictionary.
-    :param limits: A dictionary of limits.
+    :param all_limits: A dictionary of all limits (per column).
     :param style_settings: The style configuration for plots.
     :return: A tuple containing a dictionary of generated plots and a list of analysis results.
     """
@@ -31,11 +31,11 @@ def process_columns(df: pd.DataFrame, config: Config, limits: Dict[str, Dict[str
     for value_col in value_cols:
         logging.info(f"Processing column: {value_col}")
 
-        # Construct limits_dict for the current value_col
-        current_limits_dict: Dict[str, Optional[float]] = {
-            "lower_limit": limits.get("Lower_Limit", {}).get(value_col),
-            "upper_limit": limits.get("Upper_Limit", {}).get(value_col),
-            "target_value": limits.get("Target", {}).get(value_col),
+        # Construct limits for the current value_col
+        limits: Dict[str, Optional[float]] = {
+            "lower_limit": all_limits.get("Lower_Limit", {}).get(value_col),
+            "upper_limit": all_limits.get("Upper_Limit", {}).get(value_col),
+            "target_value": all_limits.get("Target", {}).get(value_col),
         }
 
         num_groups: int = df[group_col].nunique()
@@ -51,9 +51,9 @@ def process_columns(df: pd.DataFrame, config: Config, limits: Dict[str, Dict[str
         for analysis_cls in analyses_to_run:
             analyzer = analysis_cls()
             func = analyzer.analyze
-            if apply_relevance and current_limits_dict["lower_limit"] is not None and current_limits_dict["upper_limit"] is not None:
+            if apply_relevance and limits["lower_limit"] is not None and limits["upper_limit"] is not None:
                 func = relevance_decorator(
-                    current_limits_dict, # Pass limits_dict
+                    limits, # Pass limits
                     relevance_threshold,
                 )(func)
             result: AnalysisResult = func(df, group_col, value_col)
@@ -66,11 +66,11 @@ def process_columns(df: pd.DataFrame, config: Config, limits: Dict[str, Dict[str
 
         # Add box plot to the first column
         plotter = ConfigLoader("config.yaml").get_plot_instance("BoxPlot")
-        plotter.plot(df, group_col, value_col, limits_dict=current_limits_dict, fig=fig, row=1, col=1, style_settings=style_settings)
+        plotter.plot(df, group_col, value_col, limits=limits, fig=fig, row=1, col=1, style_settings=style_settings)
 
         # Add cumulative frequency plot to the second column
         plotter = ConfigLoader("config.yaml").get_plot_instance("CumulativeFrequencyPlot")
-        plotter.plot(df, group_col, value_col, limits_dict=current_limits_dict, fig=fig, row=1, col=2, style_settings=style_settings)
+        plotter.plot(df, group_col, value_col, limits=limits, fig=fig, row=1, col=2, style_settings=style_settings)
 
         fig.update_layout(title_text=f"Plots for {value_col}")
         plots[value_col] = fig
@@ -101,17 +101,18 @@ def main() -> None:
     config: Config = loader.settings
     style_settings: Box = loader.style_settings # Get style settings
 
-    df, limits = load_data_with_limits("data/fake.csv")
+    df, all_limits = load_data_with_limits("data/fake.csv") # Renamed limits to all_limits
 
     plots: dict[str, go.Figure]
     results: list[AnalysisResult]
-    plots, results = process_columns(df, config, limits, style_settings)
+    plots, results = process_columns(df, config, all_limits, style_settings)
 
     # Generate significance plot
     if any(cast(PlotConfig, plot_cfg)["name"] == "SignificancePlot" for plot_cfg in config["plots"]):
         plotter = loader.get_plot_instance("SignificancePlot")
         # Pass df, group_col, value_col as required by ABC, even if unused by SignificancePlot
-        fig: go.Figure = plotter.plot(df=df, group_col=config["group_col"], value_col=config["value_col"], limits_dict=current_limits_dict, results=results, style_settings=style_settings)
+        # Pass a dummy limits dict for SignificancePlot as it doesn't use it directly
+        fig: go.Figure = plotter.plot(df=df, group_col=config["group_col"], value_col=config["value_col"], limits={}, results=results, style_settings=style_settings)
         plots["Significance Plot"] = fig
 
     generate_reports(plots, results, config)
