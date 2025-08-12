@@ -1,4 +1,4 @@
-limits_style:
+limits:
   LSL:
     annotation_text: "LSL"
     line_color: "red"
@@ -20,3 +20,13 @@ limits_style:
     annotation_xshift_horizontal: 10
     annotation_position_vertical: "top"
     annotation_yshift_vertical: 10
+
+axis:
+  font_size: 16
+  font_color: blue
+  title_font_size: 20
+  title_font_color: black
+  show_grid: true
+  grid_color: lightgray
+  zero_line: true
+  zero_line_color: black

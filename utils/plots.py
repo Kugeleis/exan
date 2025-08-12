@@ -127,6 +127,47 @@ class Plot(ABC):
                     annotation_yshift,
                 )
 
+    def _apply_axis_style(
+        self,
+        fig: go.Figure,
+        axis_style: Box,
+        row: Optional[int] = None,
+        col: Optional[int] = None,
+        xaxis_name: str = "xaxis",
+        yaxis_name: str = "yaxis",
+    ):
+        if axis_style is None:
+            return
+
+        # Apply to x-axis
+        xaxis_updates = {}
+        if "font_size" in axis_style: xaxis_updates["tickfont_size"] = axis_style.font_size
+        if "font_color" in axis_style: xaxis_updates["tickfont_color"] = axis_style.font_color
+        if "title_font_size" in axis_style: xaxis_updates["title_font_size"] = axis_style.title_font_size
+        if "title_font_color" in axis_style: xaxis_updates["title_font_color"] = axis_style.title_font_color
+        if "show_grid" in axis_style: xaxis_updates["showgrid"] = axis_style.show_grid
+        if "grid_color" in axis_style: xaxis_updates["gridcolor"] = axis_style.grid_color
+        if "zero_line" in axis_style: xaxis_updates["zeroline"] = axis_style.zero_line
+        if "zero_line_color" in axis_style: xaxis_updates["zerolinecolor"] = axis_style.zero_line_color
+
+        # Apply to y-axis
+        yaxis_updates = {}
+        if "font_size" in axis_style: yaxis_updates["tickfont_size"] = axis_style.font_size
+        if "font_color" in axis_style: yaxis_updates["tickfont_color"] = axis_style.font_color
+        if "title_font_size" in axis_style: yaxis_updates["title_font_size"] = axis_style.title_font_size
+        if "title_font_color" in axis_style: yaxis_updates["title_font_color"] = axis_style.title_font_color
+        if "show_grid" in axis_style: yaxis_updates["showgrid"] = axis_style.show_grid
+        if "grid_color" in axis_style: yaxis_updates["gridcolor"] = axis_style.grid_color
+        if "zero_line" in axis_style: yaxis_updates["zeroline"] = axis_style.zero_line
+        if "zero_line_color" in axis_style: yaxis_updates["zerolinecolor"] = axis_style.zero_line_color
+
+        if row is not None and col is not None:
+            fig.update_layout(**{f"{xaxis_name}{row if row > 1 else ''}": xaxis_updates})
+            fig.update_layout(**{f"{yaxis_name}{col if col > 1 else ''}": yaxis_updates})
+        else:
+            fig.update_layout(xaxis=xaxis_updates, yaxis=yaxis_updates)
+
+
 @register_plot
 class BoxPlot(Plot):
     """Interactive box plot of all groups."""
@@ -146,6 +187,8 @@ class BoxPlot(Plot):
             fig.add_trace(trace, row=row, col=col)
 
         self._add_all_limit_lines(fig, lower_limit, upper_limit, target_value, True, row, col, style_settings=style_settings)
+        if style_settings and "axis" in style_settings:
+            self._apply_axis_style(fig, style_settings.axis, row, col, yaxis_name="yaxis")
         return fig
 
 @register_plot
@@ -169,6 +212,8 @@ class CumulativeFrequencyPlot(Plot):
             fig.add_trace(go.Scatter(x=vals, y=cum, mode="lines", name=str(g)), row=row, col=col)
 
         self._add_all_limit_lines(fig, lower_limit, upper_limit, target_value, False, row, col, style_settings=style_settings)
+        if style_settings and "axis" in style_settings:
+            self._apply_axis_style(fig, style_settings.axis, row, col, xaxis_name="xaxis")
         return fig
 
 @register_plot
@@ -197,4 +242,6 @@ class SignificancePlot(Plot):
 
         fig.add_trace(go.Bar(x=columns, y=p_values, name="P-Value"), row=row, col=col)
         fig.add_hline(y=0.05, line_dash="dash", line_color="red", annotation_text="Alpha=0.05", annotation_position="top right", row=row, col=col)
+        if style_settings and "axis" in style_settings:
+            self._apply_axis_style(fig, style_settings.axis, row, col, yaxis_name="yaxis", xaxis_name="xaxis")
         return fig

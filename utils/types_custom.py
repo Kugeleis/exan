@@ -38,6 +38,33 @@ class OutputConfig(TypedDict):
     save_pdf: bool
     output_directory: str
 
+class AxisStyle(TypedDict, total=False):
+    font_size: int
+    font_color: str
+    title_font_size: int
+    title_font_color: str
+    show_grid: bool
+    grid_color: str
+    zero_line: bool
+    zero_line_color: str
+
+class LimitsStyle(TypedDict, total=False):
+    annotation_text: str
+    line_color: str
+    annotation_position_horizontal: str
+    annotation_xshift_horizontal: int
+    annotation_position_vertical: str
+    annotation_yshift_vertical: int
+
+class LimitsStyles(TypedDict):
+    LSL: LimitsStyle
+    USL: LimitsStyle
+    T: LimitsStyle
+
+class StyleConfig(TypedDict, total=False):
+    limits_style: LimitsStyles
+    axis: AxisStyle
+
 class Config(TypedDict):
     report: ReportConfig
     group_col: str
