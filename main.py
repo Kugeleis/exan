@@ -26,12 +26,23 @@ def process_columns(df: pd.DataFrame, config: Config, limits: dict[str, float]) 
     plots: dict[str, go.Figure] = {}
     results: list[AnalysisResult] = []
 
+    # Get generic limits once
+    generic_lower_limit: float | None = limits.get("Lower_Limit")
+    generic_upper_limit: float | None = limits.get("Upper_Limit")
+    generic_target_value: float | None = limits.get("Target")
+
     for value_col in value_cols:
         logging.info(f"Processing column: {value_col}")
 
-        lower_limit: float | None = limits.get(f"{value_col}_Lower_Limit")
-        upper_limit: float | None = limits.get(f"{value_col}_Upper_Limit")
-        target_value: float | None = limits.get(f"{value_col}_Target") # Get target value
+        # Use generic limits for plotting
+        lower_limit_for_plot = generic_lower_limit
+        upper_limit_for_plot = generic_upper_limit
+        target_value_for_plot = generic_target_value
+
+        # For relevance decorator, still use value-specific limits if they exist
+        # This assumes relevance is tied to specific value ranges, not generic ones
+        lower_limit_for_relevance: float | None = limits.get(f"{value_col}_Lower_Limit", generic_lower_limit)
+        upper_limit_for_relevance: float | None = limits.get(f"{value_col}_Upper_Limit", generic_upper_limit)
 
         num_groups: int = df[group_col].nunique()
         analyses_to_run: list = []
@@ -46,10 +57,10 @@ def process_columns(df: pd.DataFrame, config: Config, limits: dict[str, float]) 
         for analysis_cls in analyses_to_run:
             analyzer = analysis_cls()
             func = analyzer.analyze
-            if apply_relevance and lower_limit is not None and upper_limit is not None:
+            if apply_relevance and lower_limit_for_relevance is not None and upper_limit_for_relevance is not None:
                 func = relevance_decorator(
-                    lower_limit,
-                    upper_limit,
+                    lower_limit_for_relevance,
+                    upper_limit_for_relevance,
                     relevance_threshold,
                 )(func)
             result: AnalysisResult = func(df, group_col, value_col)
@@ -62,11 +73,11 @@ def process_columns(df: pd.DataFrame, config: Config, limits: dict[str, float]) 
 
         # Add box plot to the first column
         plotter = ConfigLoader("config.yaml").get_plot_instance("BoxPlot")
-        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, target_value, fig=fig, row=1, col=1)
+        plotter.plot(df, group_col, value_col, lower_limit_for_plot, upper_limit_for_plot, target_value_for_plot, fig=fig, row=1, col=1)
 
         # Add cumulative frequency plot to the second column
         plotter = ConfigLoader("config.yaml").get_plot_instance("CumulativeFrequencyPlot")
-        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, target_value, fig=fig, row=1, col=2)
+        plotter.plot(df, group_col, value_col, lower_limit_for_plot, upper_limit_for_plot, target_value_for_plot, fig=fig, row=1, col=2)
 
         fig.update_layout(title_text=f"Plots for {value_col}")
         plots[value_col] = fig
