@@ -41,8 +41,8 @@ class ConfigLoader:
 
         self._style_config: Box = Box.from_yaml(filename=self.style_file)
         self._validate()
-        self._autoimport('src.utils.analyses')
-        self._autoimport('src.utils.plots')
+        importlib.import_module('src.utils.analyses')
+        importlib.import_module('src.utils.plots')
 
     def _validate(self):
         """
@@ -64,18 +64,7 @@ class ConfigLoader:
         if "name" not in self._config["report"]:
             raise KeyError("Missing key: name in report section")
 
-    def _autoimport(self, pkg):
-        """
-        Automatically imports modules within a specified package to trigger registration decorators.
-
-        Args:
-            pkg (str): The name of the package to auto-import (e.g., 'src.utils.analyses').
-        """
-        package = importlib.import_module(pkg)
-        path = Path(__file__).parent
-        for _, modname, ispkg in pkgutil.iter_modules([str(path)]):
-            if not ispkg:
-                importlib.import_module(f".{modname}", pkg)
+    
 
     @property
     def settings(self) -> Config:

@@ -68,9 +68,9 @@ B,2
     mock_config_loader.return_value.settings.input.data_file = csv_path
 
     with patch('main.load_data_with_limits', return_value=(pd.read_csv(csv_path, skiprows=2), mock_limits)) as mock_load_data:
-        with patch.object(TTestAnalysis, 'analyze', return_value={'test': 'T-test', 'p_value': 0.01, 'statistic': 2.5}) as mock_ttest, \
-             patch.object(MannWhitneyAnalysis, 'analyze', return_value={'test': 'Mann-Whitney', 'p_value': 0.02, 'statistic': 3.0}) as mock_mannwhitney, \
-             patch.object(AnovaAnalysis, 'analyze', return_value={'test': 'ANOVA', 'p_value': 0.03, 'F_statistic': 4.0}) as mock_anova:
+        with patch('main.TTestAnalysis.analyze', return_value={'test': 'T-test', 'p_value': 0.01, 'statistic': 2.5}) as mock_ttest, \
+             patch('main.MannWhitneyAnalysis.analyze', return_value={'test': 'Mann-Whitney', 'p_value': 0.02, 'statistic': 3.0}) as mock_mannwhitney, \
+             patch('main.AnovaAnalysis.analyze', return_value={'test': 'ANOVA', 'p_value': 0.03, 'F_statistic': 4.0}) as mock_anova:
             main.run_analysis(mock_config_loader.return_value.settings, mock_config_loader.return_value.style_settings, mock_config_loader.return_value)
             assert mock_ttest.called
             assert mock_mannwhitney.called
@@ -98,9 +98,9 @@ C,2
     mock_config_loader.return_value.settings.input.data_file = csv_path
 
     with patch('main.load_data_with_limits', return_value=(pd.read_csv(csv_path, skiprows=2), mock_limits)) as mock_load_data:
-        with patch.object(TTestAnalysis, 'analyze', return_value={'test': 'T-test', 'p_value': 0.01, 'statistic': 2.5}) as mock_ttest, \
-             patch.object(MannWhitneyAnalysis, 'analyze', return_value={'test': 'Mann-Whitney', 'p_value': 0.02, 'statistic': 3.0}) as mock_mannwhitney, \
-             patch.object(AnovaAnalysis, 'analyze', return_value={'test': 'ANOVA', 'p_value': 0.03, 'F_statistic': 4.0}) as mock_anova:
+        with patch('main.TTestAnalysis.analyze', return_value={'test': 'T-test', 'p_value': 0.01, 'statistic': 2.5}) as mock_ttest, \
+             patch('main.MannWhitneyAnalysis.analyze', return_value={'test': 'Mann-Whitney', 'p_value': 0.02, 'statistic': 3.0}) as mock_mannwhitney, \
+             patch('main.AnovaAnalysis.analyze', return_value={'test': 'ANOVA', 'p_value': 0.03, 'F_statistic': 4.0}) as mock_anova:
             main.run_analysis(mock_config_loader.return_value.settings, mock_config_loader.return_value.style_settings, mock_config_loader.return_value)
             assert not mock_ttest.called
             assert not mock_mannwhitney.called
@@ -124,9 +124,9 @@ A,2
     mock_config_loader.return_value.settings.input.data_file = csv_path
 
     with patch('main.load_data_with_limits', return_value=(pd.read_csv(csv_path, skiprows=2), mock_limits)) as mock_load_data:
-        with patch.object(TTestAnalysis, 'analyze', return_value={'test': 'T-test', 'p_value': 0.01, 'statistic': 2.5}) as mock_ttest, \
-             patch.object(MannWhitneyAnalysis, 'analyze', return_value={'test': 'Mann-Whitney', 'p_value': 0.02, 'statistic': 3.0}) as mock_mannwhitney, \
-             patch.object(AnovaAnalysis, 'analyze', return_value={'test': 'ANOVA', 'p_value': 0.03, 'F_statistic': 4.0}) as mock_anova:
+        with patch('main.TTestAnalysis.analyze', return_value={'test': 'T-test', 'p_value': 0.01, 'statistic': 2.5}) as mock_ttest, \
+             patch('main.MannWhitneyAnalysis.analyze', return_value={'test': 'Mann-Whitney', 'p_value': 0.02, 'statistic': 3.0}) as mock_mannwhitney, \
+             patch('main.AnovaAnalysis.analyze', return_value={'test': 'ANOVA', 'p_value': 0.03, 'F_statistic': 4.0}) as mock_anova:
             main.run_analysis(mock_config_loader.return_value.settings, mock_config_loader.return_value.style_settings, mock_config_loader.return_value)
             assert not mock_ttest.called
             assert not mock_mannwhitney.called
