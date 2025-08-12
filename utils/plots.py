@@ -19,7 +19,7 @@ class Plot:
         value_col: Optional[str] = None,
         lower_limit: Optional[float] = None,
         upper_limit: Optional[float] = None,
-        target_value: Optional[float] = None, # Added target_value
+        target_value: Optional[float] = None,
         fig: Optional[go.Figure] = None,
         row: Optional[int] = None,
         col: Optional[int] = None,
@@ -33,7 +33,7 @@ class BoxPlot(Plot):
     def plot(self, df: pd.DataFrame, group_col: str, value_col: str,
              lower_limit: Optional[float] = None,
              upper_limit: Optional[float] = None,
-             target_value: Optional[float] = None, # Added target_value
+             target_value: Optional[float] = None,
              fig: Optional[go.Figure] = None,
              row: Optional[int] = None,
              col: Optional[int] = None,
@@ -45,11 +45,11 @@ class BoxPlot(Plot):
             fig.add_trace(trace, row=row, col=col)
 
         if lower_limit is not None:
-            fig.add_hline(y=lower_limit, line_dash="dash", line_color="red", row=row, col=col)
+            fig.add_hline(y=lower_limit, line_dash="dash", line_color="red", annotation_text="LSL", annotation_position="bottom right", row=row, col=col)
         if upper_limit is not None:
-            fig.add_hline(y=upper_limit, line_dash="dash", line_color="red", row=row, col=col)
-        if target_value is not None: # Add target line
-            fig.add_hline(y=target_value, line_dash="dash", line_color="green", row=row, col=col)
+            fig.add_hline(y=upper_limit, line_dash="dash", line_color="red", annotation_text="USL", annotation_position="top right", row=row, col=col)
+        if target_value is not None:
+            fig.add_hline(y=target_value, line_dash="dash", line_color="green", annotation_text="T", annotation_position="top left", row=row, col=col)
         return fig
 
 @register_plot
@@ -58,7 +58,7 @@ class CumulativeFrequencyPlot(Plot):
     def plot(self, df: pd.DataFrame, group_col: str, value_col: str,
              lower_limit: Optional[float] = None,
              upper_limit: Optional[float] = None,
-             target_value: Optional[float] = None, # Added target_value
+             target_value: Optional[float] = None,
              fig: Optional[go.Figure] = None,
              row: Optional[int] = None,
              col: Optional[int] = None,
@@ -72,11 +72,11 @@ class CumulativeFrequencyPlot(Plot):
             fig.add_trace(go.Scatter(x=vals, y=cum, mode="lines", name=str(g)), row=row, col=col)
 
         if lower_limit is not None:
-            fig.add_vline(x=lower_limit, line_dash="dash", line_color="red", row=row, col=col)
+            fig.add_vline(x=lower_limit, line_dash="dash", line_color="red", annotation_text="LSL", annotation_position="bottom right", row=row, col=col)
         if upper_limit is not None:
-            fig.add_vline(x=upper_limit, line_dash="dash", line_color="red", row=row, col=col)
-        if target_value is not None: # Add target line
-            fig.add_vline(x=target_value, line_dash="dash", line_color="green", row=row, col=col)
+            fig.add_vline(x=upper_limit, line_dash="dash", line_color="red", annotation_text="USL", annotation_position="top right", row=row, col=col)
+        if target_value is not None:
+            fig.add_vline(x=target_value, line_dash="dash", line_color="green", annotation_text="T", annotation_position="top left", row=row, col=col)
         return fig
 
 @register_plot
@@ -97,5 +97,5 @@ class SignificancePlot(Plot):
         p_values = [result['p_value'] for result in results]
 
         fig.add_trace(go.Bar(x=columns, y=p_values, name="P-Value"), row=row, col=col)
-        fig.add_hline(y=0.05, line_dash="dash", line_color="red", row=row, col=col)
+        fig.add_hline(y=0.05, line_dash="dash", line_color="red", annotation_text="Alpha=0.05", annotation_position="top right", row=row, col=col)
         return fig
