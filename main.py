@@ -31,6 +31,7 @@ def process_columns(df: pd.DataFrame, config: Config, limits: dict[str, float]) 
 
         lower_limit: float | None = limits.get(f"{value_col}_Lower_Limit")
         upper_limit: float | None = limits.get(f"{value_col}_Upper_Limit")
+        target_value: float | None = limits.get(f"{value_col}_Target") # Get target value
 
         num_groups: int = df[group_col].nunique()
         analyses_to_run: list = []
@@ -61,11 +62,11 @@ def process_columns(df: pd.DataFrame, config: Config, limits: dict[str, float]) 
 
         # Add box plot to the first column
         plotter = ConfigLoader("config.yaml").get_plot_instance("BoxPlot")
-        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, fig=fig, row=1, col=1)
+        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, target_value, fig=fig, row=1, col=1)
 
         # Add cumulative frequency plot to the second column
         plotter = ConfigLoader("config.yaml").get_plot_instance("CumulativeFrequencyPlot")
-        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, fig=fig, row=1, col=2)
+        plotter.plot(df, group_col, value_col, lower_limit, upper_limit, target_value, fig=fig, row=1, col=2)
 
         fig.update_layout(title_text=f"Plots for {value_col}")
         plots[value_col] = fig
