@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, patch, mock_open, call
 import plotly.graph_objects as go
-from utils.reporting import (
+from src.utils.reporting import (
     generate_report,
     report_generator_factory,
     InteractiveHTMLReportGenerator,
@@ -52,7 +52,7 @@ def mock_results():
         },
     ]
 
-@patch("utils.reporting.get_project_version", return_value="0.0.0")
+@patch("src.utils.reporting.get_project_version", return_value="0.0.0")
 @patch("pathlib.Path.mkdir")
 @patch("builtins.open", new_callable=mock_open)
 def test_interactive_html_report_generator(mock_file_open, mock_mkdir, mock_get_version, mock_plots, mock_results, mock_config):
@@ -66,7 +66,7 @@ def test_interactive_html_report_generator(mock_file_open, mock_mkdir, mock_get_
     handle.write.assert_any_call("<html><head><title>Analysis Report</title></head><body><a name=\"top\"></a>")
     handle.write.assert_any_call("<h1>Analysis Report</h1>")
 
-@patch("utils.reporting.get_project_version", return_value="0.0.0")
+@patch("src.utils.reporting.get_project_version", return_value="0.0.0")
 @patch("pathlib.Path.mkdir")
 @patch("builtins.open", new_callable=mock_open)
 def test_static_html_report_generator(mock_file_open, mock_mkdir, mock_get_version, mock_plots, mock_results, mock_config):
@@ -81,12 +81,12 @@ def test_static_html_report_generator(mock_file_open, mock_mkdir, mock_get_versi
     handle.write.assert_any_call("<h1>Static Analysis Report</h1>")
 
 
-@patch("utils.reporting.get_project_version", return_value="0.0.0")
+@patch("src.utils.reporting.get_project_version", return_value="0.0.0")
 @patch("pathlib.Path.mkdir")
-@patch("utils.reporting.FPDF")
+@patch("src.utils.reporting.FPDF")
 @patch("plotly.graph_objects.Figure.write_image")
-@patch("utils.reporting.tempfile.NamedTemporaryFile")
-@patch("utils.reporting.os.remove")
+@patch("src.utils.reporting.tempfile.NamedTemporaryFile")
+@patch("src.utils.reporting.os.remove")
 def test_pdf_report_generator(mock_os_remove, mock_tempfile, mock_write_image, mock_fpdf, mock_mkdir, mock_get_version, mock_plots, mock_results, mock_config):
     # Mock the temporary file context manager
     mock_temp_file_instance = MagicMock()
@@ -118,7 +118,7 @@ def test_report_generator_factory(mock_plots, mock_results, mock_config):
         report_generator_factory("unknown_format", mock_plots, mock_results, mock_config)
 
 
-@patch("utils.reporting.report_generator_factory")
+@patch("src.utils.reporting.report_generator_factory")
 def test_generate_report(mock_factory, mock_plots, mock_results, mock_config):
     mock_interactive_gen = MagicMock()
     mock_static_gen = MagicMock()

@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from utils.boxcox_preprocessing import boxcox_transform, apply_boxcox_preprocessing
+from src.utils.boxcox_preprocessing import boxcox_transform, apply_boxcox_preprocessing
 
 def test_boxcox_transform():
     data = pd.Series([1, 2, 3, 4, 5])

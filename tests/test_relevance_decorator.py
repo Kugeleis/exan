@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from utils.relevance_decorator import relevance_decorator
+from src.utils.relevance_decorator import relevance_decorator
 
 def mock_analysis_significant(df, group_col, value_col):
     return {

@@ -2,7 +2,7 @@
 import pytest
 import pandas as pd
 import plotly.graph_objects as go
-from utils.plots import BoxPlot, CumulativeFrequencyPlot, SignificancePlot
+from src.utils.plots import BoxPlot, CumulativeFrequencyPlot, SignificancePlot
 from box import Box
 
 @pytest.fixture

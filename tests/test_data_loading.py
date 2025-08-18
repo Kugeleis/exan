@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from utils.preprocessing import load_data_with_limits
+from src.utils.preprocessing import load_data_with_limits
 import os
 
 @pytest.fixture

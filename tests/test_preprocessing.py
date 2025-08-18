@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from utils.preprocessing import filter_outliers
+from src.utils.preprocessing import filter_outliers
 
 @pytest.fixture
 def outlier_data():

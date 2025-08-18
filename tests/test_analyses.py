@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from utils.analyses import AnovaAnalysis, TTestAnalysis, MannWhitneyAnalysis
+from src.utils.analyses import AnovaAnalysis, TTestAnalysis, MannWhitneyAnalysis
 
 @pytest.fixture
 def sample_data():
