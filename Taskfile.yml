@@ -43,7 +43,7 @@ tasks:
   run:
     desc: "Run the main analysis script"
     cmds:
-      - uv run python main.py
+      - uv run python app.py
 
   install-chrome:
     desc: "Install Google Chrome"
