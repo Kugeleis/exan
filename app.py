@@ -19,7 +19,19 @@ def version_callback(value: bool):
 
 @app.command()
 def main(
-    config_file: Annotated[Path, typer.Option("--config", "-c", help="Path to the configuration file.")] = Path("config.yaml"),
+    config_file: Annotated[
+        Path,
+        typer.Option(
+            "--config",
+            "-c",
+            help="Path to the configuration file.",
+            exists=False,  # Allow the default to be non-existent
+            file_okay=True,
+            dir_okay=True,  # Allow directories as well
+            readable=True,
+            resolve_path=True,
+        ),
+    ] = Path("config.yaml"),
     version: Annotated[
         Optional[bool],
         typer.Option("--version", callback=version_callback, is_eager=True, help="Show the application's version and exit."),
