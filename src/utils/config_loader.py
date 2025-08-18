@@ -2,6 +2,7 @@ from pathlib import Path
 import importlib
 import pkgutil
 from box import Box
+from typing import Optional
 from .analysis_registry import ANALYSIS_REGISTRY
 from .plot_registry import PLOT_REGISTRY
 from .types_custom import Config
@@ -14,7 +15,7 @@ class ConfigLoader:
     and the style configuration (`style.yaml`). It also performs basic validation
     and auto-imports analysis and plot modules to register them.
     """
-    def __init__(self, config_file: str = "config.yaml", style_file: str = "style.yaml", default_config_file: str = "default_config.yaml"):
+    def __init__(self, config_file: Optional[str] = None, style_file: str = "style.yaml", default_config_file: str = "default_config.yaml"):
         """
         Initializes the ConfigLoader by loading configuration files.
 
@@ -28,14 +29,14 @@ class ConfigLoader:
             KeyError: If essential keys are missing from the merged configuration.
         """
         self.default_config_file: str = default_config_file
-        self.config_file = Path(config_file)
+        self.config_file = Path(config_file) if config_file else None
         self.style_file = Path(style_file)
 
         # Load default config
         self._config: Config = Box.from_yaml(filename=self.default_config_file)
 
         # Load user config and merge it into the default config
-        if self.config_file.exists():
+        if self.config_file and self.config_file.exists():
             user_config = Box.from_yaml(filename=self.config_file)
             self._config.merge_update(user_config)
 

@@ -1,0 +1,11 @@
+report:
+  name: CO2 contribution per capita
+
+input:
+  data_file: co2_pcap_cons_with_continentsmall.csv
+  group_col: continent
+  value_col: "2022"
+
+analyses:
+  - name: "TTestAnalysis"
+    relevance: true
