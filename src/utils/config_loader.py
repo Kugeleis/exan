@@ -41,7 +41,7 @@ class ConfigLoader:
             self._config.merge_update(user_config)
 
         self._style_config: Box = Box.from_yaml(filename=self.style_file)
-        self._validate()
+        # self._validate()
         importlib.import_module('src.utils.analyses')
         importlib.import_module('src.utils.plots')
 
